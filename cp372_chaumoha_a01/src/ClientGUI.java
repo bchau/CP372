@@ -70,13 +70,22 @@ public class ClientGUI extends JFrame{
 			
 			JPanel interactionPane = new JPanel();
 			interactionPane.setLayout(new BoxLayout(interactionPane, BoxLayout.Y_AXIS));
-			interactionPane.add(inputLabel);
+			
+			JPanel inputLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			inputLabelPanel.add(inputLabel);
+			
+			interactionPane.add(inputLabelPanel);
 			interactionPane.add(inputArea);
+			
 			JPanel sendBPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			sendBPanel.add(sendButton);
+			
 			interactionPane.add(sendBPanel);
-			interactionPane.add(resultLabel);
-			interactionPane.add(resultLabel);
+			
+			JPanel resultLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			resultLabelPanel.add(resultLabel);
+			
+			interactionPane.add(resultLabelPanel);
 			interactionPane.add(outputArea);
 			this.add(interactionPane, BorderLayout.CENTER);
 			//this.add(ipField, BorderLayout.NORTH);

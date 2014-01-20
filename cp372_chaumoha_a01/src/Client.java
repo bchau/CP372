@@ -5,8 +5,8 @@ public class Client {
 	public static void main(String[] args) throws IOException {
 
         Socket socket = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
+        PrintWriter out = null; // do we need this?
+        BufferedReader in = null; // do we need this?
         
         try{
         	socket = new Socket("192.168.5.6",80);
@@ -22,5 +22,8 @@ public class Client {
         }
         
         
+        //TODO: From Server
+        //TODO: From User        
+        socket.close();
 	}
 }

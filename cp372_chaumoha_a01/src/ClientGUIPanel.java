@@ -2,10 +2,14 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -19,6 +23,8 @@ public class ClientGUIPanel extends JPanel {
 	private JButton sendButton;
 	private JToggleButton connectToggle;
 	private JLabel ipLabel, portLabel, inputLabel, resultLabel;
+	private Socket socket = null;
+	private Client client = null;
 
 	public ClientGUIPanel() {
 		super();
@@ -35,8 +41,8 @@ public class ClientGUIPanel extends JPanel {
 		resultLabel = new JLabel("Server Result:");
 
 		// init fields
-		ipField = new JTextField(15);
-		portField = new JTextField(4);
+		ipField = new JTextField("127.0.0.1", 15);
+		portField = new JTextField("4444", 4);
 
 		// init i/o area
 		inputArea = new JTextArea(10, 50);
@@ -66,8 +72,9 @@ public class ClientGUIPanel extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				outputArea.append(inputArea.getText());
-				inputArea.setText("");
+				if (client!=null) {
+					client.unpause();
+				}
 			}
 		});
 		connectToggle = new JToggleButton("Connect");
@@ -90,11 +97,7 @@ public class ClientGUIPanel extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (connectToggle.isSelected()) {
-					connectToggle.setText("Disconnect");
-				} else {
-					connectToggle.setText("Connect");
-				}
+				connectDisconnect();
 			}
 		});
 
@@ -123,4 +126,57 @@ public class ClientGUIPanel extends JPanel {
 		interactionPane.add(new JScrollPane(outputArea));
 		this.add(interactionPane, BorderLayout.CENTER);
 	}
+
+	private void connectDisconnect() {
+		if (socket == null && client == null) {
+			String err = null;
+			try {
+				outputArea.append("Connecting...\n");
+				socket = new Socket(ipField.getText(), new Integer(portField.getText()));
+				
+				if (socket != null)
+					client = new Client(socket, inputArea, outputArea);
+				else
+					throw new Exception("Could not create connection");
+				connectToggle.setText("Disconnect");
+				connectToggle.setSelected(true);
+			} catch (UnknownHostException e) {
+				connectToggle.setText("Connect");
+				connectToggle.setSelected(false);
+				err = "Could not find host.";
+			} catch (NumberFormatException e) {
+				connectToggle.setText("Connect");
+				connectToggle.setSelected(false);
+				err = "Please ensure port number is correct";
+			} catch (IOException e) {
+				connectToggle.setText("Connect");
+				connectToggle.setSelected(false);
+			} catch (Exception e) {
+				connectToggle.setText("Connect");
+				connectToggle.setSelected(false);
+				err = e.getMessage();
+			}
+			if (err != null)
+				JOptionPane.showMessageDialog(this,
+					    err,
+					    "Error Connecting",
+					    JOptionPane.ERROR_MESSAGE);
+		} else {
+			try {
+				outputArea.append("Disconnecting...\n");
+				client.tStop();
+				client = null;
+				socket.close();
+				socket = null;
+				connectToggle.setText("Connect");
+				connectToggle.setSelected(false);
+				outputArea.append("Disconnected\n");
+			} catch (Exception e) {
+				connectToggle.setText("Disconnect");
+				connectToggle.setSelected(true);
+			}
+
+		}
+	}
+	
 }

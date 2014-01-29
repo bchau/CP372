@@ -137,7 +137,7 @@ public class ClientGUIPanel extends JPanel {
 				if (socket != null)
 					client = new Client(socket, inputArea, outputArea);
 				else
-					throw new Exception("Could not create connection");
+					throw new Exception("Could not create connection, error with host");
 				connectToggle.setText("Disconnect");
 				connectToggle.setSelected(true);
 			} catch (UnknownHostException e) {

@@ -3,7 +3,9 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import javax.swing.BoxLayout;
@@ -139,7 +141,9 @@ public class ClientGUIPanel extends JPanel {
 				else
 					throw new Exception("Could not create connection, error with host");
 				connectToggle.setText("Disconnect");
-				connectToggle.setSelected(true);
+				connectToggle.setSelected(false);
+				outputArea.append("Connected.\n");
+				//connectToggle.setSelected(true);
 			} catch (UnknownHostException e) {
 				connectToggle.setText("Connect");
 				connectToggle.setSelected(false);
@@ -147,10 +151,11 @@ public class ClientGUIPanel extends JPanel {
 			} catch (NumberFormatException e) {
 				connectToggle.setText("Connect");
 				connectToggle.setSelected(false);
-				err = "Please ensure port number is correct";
+				err = "Please ensure port number is correct.";
 			} catch (IOException e) {
 				connectToggle.setText("Connect");
 				connectToggle.setSelected(false);
+				err = "Could not connect.";
 			} catch (Exception e) {
 				connectToggle.setText("Connect");
 				connectToggle.setSelected(false);
@@ -170,7 +175,7 @@ public class ClientGUIPanel extends JPanel {
 				socket = null;
 				connectToggle.setText("Connect");
 				connectToggle.setSelected(false);
-				outputArea.append("Disconnected\n");
+				outputArea.append("Disconnected.\n");
 			} catch (Exception e) {
 				connectToggle.setText("Disconnect");
 				connectToggle.setSelected(true);

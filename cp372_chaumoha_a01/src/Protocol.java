@@ -53,76 +53,23 @@ public class Protocol {
 	}
 	
 	private String submit(String input){
-		String[] tokens = input.split(" ");
 		
-		int i = 1;
-		String current = null;
-		Book book = new Book();
-		while (i < tokens.length){
-			if (isBookKeyword(tokens[i])){
-				current = tokens[i];
-				i++;
-			}
-			String temp = "";
-			while (i < tokens.length && !isBookKeyword(tokens[i])){
-				temp += tokens[i].trim();
-				i++;
-			}
-			if (!temp.equals("") && current != null){
-				if(current.equals("TITLE")){
-					book.setTitle(temp);
-				}
-				else if(current.equals("AUTHOR")){
-					book.setAuthor(temp);
-				}
-				else if(current.equals("LOCATION")){
-					book.setLocation(temp);
-				}
-			}
-			else
-				return PARSE_FAIL;
-		}
-		
-		if (!book.hasNull()){
-			addBook(book);
-			return SUBMIT_SUCCESS;
-		}
-		else{
+		Book book = parseInput(input);
+		if (book == null || book.hasNull()){
 			return PARSE_FAIL;
 		}
-			
-		
+		else{
+			addBook(book);
+			return SUBMIT_SUCCESS;
+		}	
 	}
 	
 	private String get(String input){
-		String[] tokens = input.split(" ");
-		
-		int i = 1;
-		String current = null;
-		Book book = new Book();
-		while (i < tokens.length){
-			if (isBookKeyword(tokens[i])){
-				current = tokens[i];
-				i++;
-			}
-			String temp = "";
-			while (i < tokens.length && !isBookKeyword(tokens[i])){
-				temp += tokens[i].trim();
-				i++;
-			}
-			if (!temp.equals("")){
-				if(current.equals("TITLE")){
-					book.setTitle(temp);
-				}
-				else if(current.equals("AUTHOR")){
-					book.setAuthor(temp);
-				}
-				else if(current.equals("LOCATION")){
-					book.setLocation(temp);
-				}
-			}
+		Book book = parseInput(input);
+		if (book == null || book.allNull()){
+			return PARSE_FAIL;
 		}
-		if (!book.allNull()){
+		else{
 			ArrayList<Book> bookSearch = new ArrayList<Book>();
 			bookSearch.addAll(books);
 			if (book.getAuthor() != null){
@@ -150,9 +97,6 @@ public class Protocol {
 			else{
 				return printBooks(bookSearch);
 			}
-		}
-		else{
-			return PARSE_FAIL;
 		}
 	}
 	
@@ -192,5 +136,38 @@ public class Protocol {
 			
 		}
 		return result;
+	}
+	
+	private Book parseInput(String input){
+		String[] tokens = input.split(" ");
+		
+		int i = 1;
+		String current = null;
+		Book book = new Book();
+		while (i < tokens.length){
+			if (isBookKeyword(tokens[i])){
+				current = tokens[i];
+				i++;
+			}
+			String temp = "";
+			while (i < tokens.length && !isBookKeyword(tokens[i])){
+				temp += tokens[i].trim();
+				i++;
+			}
+			if (!temp.equals("") && current != null){
+				if(current.equals("TITLE")){
+					book.setTitle(temp);
+				}
+				else if(current.equals("AUTHOR")){
+					book.setAuthor(temp);
+				}
+				else if(current.equals("LOCATION")){
+					book.setLocation(temp);
+				}
+			}
+			else
+				return null;
+		}
+		return book;
 	}
 }

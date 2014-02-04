@@ -55,8 +55,7 @@ public class Server {
         	}
         	
         	String temp;
-        	while (in.ready() && !Protocol.isKeyword(temp = in.readLine())){
-        		System.out.println(temp);
+        	while (in.ready() && !Protocol.isKeyword(temp = in.readLine())){  
         		inputLine += " "+temp;
         	}
 

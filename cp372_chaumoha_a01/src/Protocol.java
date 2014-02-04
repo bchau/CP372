@@ -2,14 +2,27 @@ import java.util.ArrayList;
 
 
 public class Protocol {
+	
+	//requests
 	public static final int NEW = 0;
 	public static final int SUBMIT = 1;
 	public static final int GET = 2;
 	public static final int REMOVE = 3;
 	public static final int FAULT = 4;
+	
+	//keywords
 	public static final String[] keywords = {"submit","get","remove"};
 	public static final String[] bookKeywords = {"title","author","location"};
+	
+	//books
 	private ArrayList<Book> books = new ArrayList<Book>();
+	
+	//responses
+	public static final String SUBMIT_SUCCESS = "Book submitted successfully.";
+	public static final String PARSE_FAIL = "Unable to parse request.";
+	public static final String GET_FAIL = "Book cannot be found.";
+	public static final String REMOVE_SUCCESS = "Book(s) removed.";
+	public static final String REMOVE_FAIL = "Book(s) not found.";
 	
 	public String processInput(int command, String input){
 		String result = "";
@@ -30,7 +43,8 @@ public class Protocol {
 				result = remove(input);
 				break;
 			case FAULT:
-				result = "Cannot parse command.";
+				result = PARSE_FAIL;
+				result += " Incorrect command.";
 				break;
 			default:
 				break;
@@ -39,6 +53,48 @@ public class Protocol {
 	}
 	
 	private String submit(String input){
+		String[] tokens = input.split(" ");
+		
+		int i = 1;
+		String current = null;
+		Book book = new Book();
+		while (i < tokens.length){
+			if (isBookKeyword(tokens[i])){
+				current = tokens[i];
+				i++;
+			}
+			String temp = "";
+			while (i < tokens.length && !isBookKeyword(tokens[i])){
+				temp += tokens[i].trim();
+				i++;
+			}
+			if (!temp.equals("") && current != null){
+				if(current.equals("TITLE")){
+					book.setTitle(temp);
+				}
+				else if(current.equals("AUTHOR")){
+					book.setAuthor(temp);
+				}
+				else if(current.equals("LOCATION")){
+					book.setLocation(temp);
+				}
+			}
+			else
+				return PARSE_FAIL;
+		}
+		
+		if (!book.hasNull()){
+			addBook(book);
+			return SUBMIT_SUCCESS;
+		}
+		else{
+			return PARSE_FAIL;
+		}
+			
+		
+	}
+	
+	private String get(String input){
 		String[] tokens = input.split(" ");
 		
 		int i = 1;
@@ -66,20 +122,38 @@ public class Protocol {
 				}
 			}
 		}
-		
-		if (!book.hasNull()){
-			addBook(book);
-			return "submit success";
+		if (!book.allNull()){
+			ArrayList<Book> bookSearch = new ArrayList<Book>();
+			bookSearch.addAll(books);
+			if (book.getAuthor() != null){
+				for (int j = bookSearch.size()-1; j >= 0; j--){
+					if (!books.get(j).getAuthor().equals(book.getAuthor()))
+						bookSearch.remove(j);
+				}
+			}
+			if (book.getLocation() != null){
+				for (int j = bookSearch.size()-1; j >= 0; j--){
+					if (!books.get(j).getLocation().equals(book.getLocation()))
+						bookSearch.remove(j);
+				}
+			}
+			if (book.getTitle() != null){
+				for (int j = bookSearch.size()-1; j >= 0; j--){
+					if (!books.get(j).getTitle().equals(book.getTitle()))
+						bookSearch.remove(j);
+				}
+			}
+			
+			if (bookSearch.isEmpty()){
+				return GET_FAIL;
+			}
+			else{
+				return printBooks(bookSearch);
+			}
 		}
 		else{
-			return "submit fail";
+			return PARSE_FAIL;
 		}
-			
-		
-	}
-	
-	private String get(String input){
-		return "get";
 	}
 	
 	private String remove(String input){
@@ -110,5 +184,13 @@ public class Protocol {
 		return false;
 	}
 	
-	
+	private String printBooks(ArrayList<Book> b){
+		String result = "success"; //temporary string, will remove later
+		for (int i = 0; i < b.size(); i++){
+			Book book = b.get(i);
+			result += "\n\n"+book.getTitle()+"\n"+book.getAuthor()+"\n"+book.getLocation();
+			
+		}
+		return result;
+	}
 }

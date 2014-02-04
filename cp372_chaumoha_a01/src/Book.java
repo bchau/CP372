@@ -28,4 +28,8 @@ public class Book{
 		public boolean hasNull(){
 			return location == null || author == null || title == null;
 		}
+		
+		public boolean allNull(){
+			return location == null && author == null && title == null;
+		}
 	}

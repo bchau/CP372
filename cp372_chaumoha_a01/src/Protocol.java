@@ -101,7 +101,44 @@ public class Protocol {
 	}
 	
 	private String remove(String input){
-		return "remove";
+		Book book = parseInput(input);
+		if (book == null || book.allNull()){
+			return PARSE_FAIL;
+		}
+		else{
+			int booksRemoved = 0;
+			if (book.getAuthor() != null){
+				for (int j = books.size()-1; j >= 0; j--){
+					if (!books.get(j).getAuthor().equals(book.getAuthor())){
+						books.remove(j);
+						booksRemoved++;
+					}
+				}
+			}
+			if (book.getLocation() != null){
+				for (int j = books.size()-1; j >= 0; j--){
+					if (!books.get(j).getLocation().equals(book.getLocation())){
+						books.remove(j);
+						booksRemoved++;
+					}
+				}
+			}
+			if (book.getTitle() != null){
+				for (int j = books.size()-1; j >= 0; j--){
+					if (books.get(j).getTitle().equals(book.getTitle())){
+						books.remove(j);
+						booksRemoved++;
+					}
+				}
+			}
+			
+			if (booksRemoved == 0){
+				return REMOVE_FAIL;
+			}
+			else{
+				return REMOVE_SUCCESS;
+			}
+		}
 	}
 	
 	public static boolean isKeyword(String input){

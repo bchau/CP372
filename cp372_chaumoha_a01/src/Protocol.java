@@ -4,6 +4,7 @@ public class Protocol {
 	public static final int SUBMIT = 1;
 	public static final int GET = 2;
 	public static final int REMOVE = 3;
+	public static final int FAULT = 4;
 	public static final String[] keywords = {"submit","get","remove"};
 	
 	public String processInput(int command, String input){
@@ -23,6 +24,9 @@ public class Protocol {
 			case REMOVE:
 				//remove
 				result = remove(input);
+				break;
+			case FAULT:
+				result = "Cannot parse command.";
 				break;
 			default:
 				break;

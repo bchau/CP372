@@ -36,8 +36,7 @@ public class Server {
         outputLine = protocol.processInput(Protocol.NEW, null);
 		
         int code = -1;
-        while ((inputLine = in.readLine()) != null || code != -1){
-        	
+        while ((inputLine = in.readLine()) != null || code != -1){	
         	if (inputLine.toLowerCase().startsWith("submit")){
         		code = Protocol.SUBMIT;
         	}
@@ -46,6 +45,15 @@ public class Server {
         	}
         	else if (inputLine.toLowerCase().startsWith("remove")){
         		code = Protocol.REMOVE;
+        	}
+        	else{
+        		code = Protocol.FAULT;
+        	}
+        	
+        	String temp;
+        	while (in.ready() && !Protocol.isKeyword(temp = in.readLine())){
+        		System.out.println(temp);
+        		inputLine += " "+temp;
         	}
 
         	outputLine = protocol.processInput(code, inputLine);

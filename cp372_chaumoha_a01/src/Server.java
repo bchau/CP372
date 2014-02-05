@@ -37,17 +37,16 @@ public class Server {
 				clientSocket.getInputStream()));
         String inputLine, outputLine;
         Protocol protocol = new Protocol();
-        outputLine = protocol.processInput(Protocol.NEW, null);
 		
         int code = -1;
         while ((inputLine = in.readLine()) != null || code != -1){	
-        	if (inputLine.toLowerCase().startsWith("submit")){
+        	if (inputLine.startsWith("SUBMIT")){
         		code = Protocol.SUBMIT;
         	}
-        	else if (inputLine.toLowerCase().startsWith("get")){
+        	else if (inputLine.startsWith("GET")){
         		code = Protocol.GET;
         	}
-        	else if (inputLine.toLowerCase().startsWith("remove")){
+        	else if (inputLine.startsWith("REMOVE")){
         		code = Protocol.REMOVE;
         	}
         	else{

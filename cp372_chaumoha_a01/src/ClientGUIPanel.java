@@ -142,7 +142,7 @@ public class ClientGUIPanel extends JPanel {
 					throw new Exception("Could not create connection, error with host");
 				connectToggle.setText("Disconnect");
 				connectToggle.setSelected(false);
-				outputArea.append("Connected.\n");
+				outputArea.append("Connected.\n\n");
 				//connectToggle.setSelected(true);
 			} catch (UnknownHostException e) {
 				connectToggle.setText("Connect");
@@ -175,7 +175,7 @@ public class ClientGUIPanel extends JPanel {
 				socket = null;
 				connectToggle.setText("Connect");
 				connectToggle.setSelected(false);
-				outputArea.append("Disconnected.\n");
+				outputArea.append("Disconnected.\n\n");
 			} catch (Exception e) {
 				connectToggle.setText("Disconnect");
 				connectToggle.setSelected(true);

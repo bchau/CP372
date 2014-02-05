@@ -4,32 +4,28 @@ import java.util.ArrayList;
 public class Protocol {
 	
 	//requests
-	public static final int NEW = 0;
-	public static final int SUBMIT = 1;
-	public static final int GET = 2;
-	public static final int REMOVE = 3;
-	public static final int FAULT = 4;
+	public static final int SUBMIT = 0;
+	public static final int GET = 1;
+	public static final int REMOVE = 2;
+	public static final int FAULT = 3;
 	
 	//keywords
-	public static final String[] keywords = {"submit","get","remove"};
-	public static final String[] bookKeywords = {"title","author","location"};
+	public static final String[] keywords = {"SUBMIT","GET","REMOVE"};
+	public static final String[] bookKeywords = {"TITLE","AUTHOR","LOCATION"};
 	
 	//books
 	private ArrayList<Book> books = new ArrayList<Book>();
 	
 	//responses
-	public static final String SUBMIT_SUCCESS = "Book submitted successfully.";
-	public static final String PARSE_FAIL = "Unable to parse request.";
-	public static final String GET_FAIL = "Book cannot be found.";
-	public static final String REMOVE_SUCCESS = "Book(s) removed.";
-	public static final String REMOVE_FAIL = "Book(s) not found.";
+	public static final String SUBMIT_SUCCESS = "Book submitted successfully.\n";
+	public static final String PARSE_FAIL = "Unable to parse request.\n";
+	public static final String GET_FAIL = "Book(s) cannot be found.\n";
+	public static final String REMOVE_SUCCESS = "Book(s) removed.\n";
+	public static final String REMOVE_FAIL = "Book(s) not found.\n";
 	
 	public String processInput(int command, String input){
 		String result = "";
 		switch(command){
-			case NEW:
-				result = "Server has been connected.";
-				break;
 			case SUBMIT:
 				//update catalogue
 				result = submit(input);
@@ -44,7 +40,6 @@ public class Protocol {
 				break;
 			case FAULT:
 				result = PARSE_FAIL;
-				result += " Incorrect command.";
 				break;
 			default:
 				break;
@@ -109,7 +104,7 @@ public class Protocol {
 			int booksRemoved = 0;
 			if (book.getAuthor() != null){
 				for (int j = books.size()-1; j >= 0; j--){
-					if (!books.get(j).getAuthor().equals(book.getAuthor())){
+					if (books.get(j).getAuthor().equals(book.getAuthor())){
 						books.remove(j);
 						booksRemoved++;
 					}
@@ -117,7 +112,7 @@ public class Protocol {
 			}
 			if (book.getLocation() != null){
 				for (int j = books.size()-1; j >= 0; j--){
-					if (!books.get(j).getLocation().equals(book.getLocation())){
+					if (books.get(j).getLocation().equals(book.getLocation())){
 						books.remove(j);
 						booksRemoved++;
 					}
@@ -143,7 +138,7 @@ public class Protocol {
 	
 	public static boolean isKeyword(String input){
 		for (int i = 0; i < keywords.length; i++){
-			if (input.toLowerCase().equalsIgnoreCase(keywords[i]))
+			if (input.equals(keywords[i]))
 				return true;
 		}
 		return false;
@@ -159,7 +154,7 @@ public class Protocol {
 	
 	private static boolean isBookKeyword(String input){
 		for (int i = 0; i < bookKeywords.length; i++){
-			if (input.toLowerCase().equalsIgnoreCase(bookKeywords[i]))
+			if (input.equals(bookKeywords[i]))
 				return true;
 		}
 		return false;
@@ -169,7 +164,9 @@ public class Protocol {
 		String result = "";
 		for (int i = 0; i < b.size(); i++){
 			Book book = b.get(i);
-			result += "LOCATION "+book.getLocation()+"\n";
+			result += "The book \""+book.getTitle()+"\" "+
+			"by "+book.getAuthor()+
+			" can be found at "+book.getLocation()+"\n";
 			
 		}
 		return result;
@@ -188,9 +185,10 @@ public class Protocol {
 			}
 			String temp = "";
 			while (i < tokens.length && !isBookKeyword(tokens[i])){
-				temp += tokens[i].trim();
+				temp += tokens[i].trim()+" ";
 				i++;
 			}
+			temp = temp.trim();
 			if (!temp.equals("") && current != null){
 				if(current.equals("TITLE")){
 					book.setTitle(temp);

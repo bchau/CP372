@@ -1,17 +1,19 @@
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
 public class Client extends Thread {
 	private final static int STATE_RUN = 0, STATE_PAUSE = 2, STATE_STOP = 3;
 	private int _state;
 	private Socket socket = null;
-	private PrintWriter out = null; // do we need this?
-	private BufferedReader in = null; // do we need this?
+	private PrintWriter out = null;
+	private BufferedReader in = null;
 	private JTextArea inText, outText;
 	private String fromServer = "", fromUser = "";
 
@@ -40,7 +42,7 @@ public class Client extends Thread {
 					fromServer = in.readLine();
 					if (fromServer == null)
 						break;
-					outText.append("Server: " + fromServer + "\n");
+					outText.append(fromServer + "\n");
 					outText.setCaretPosition(outText.getDocument().getLength());
 					if (fromServer.equals("Bye."))
 						break;
@@ -53,7 +55,7 @@ public class Client extends Thread {
 					stateTemp = _state;
 				}
 			}
-			outText.append("Server: " + fromServer + "\n");
+			outText.append(fromServer + "\n");
 		} catch (IOException e) {
 		}
 
@@ -85,5 +87,15 @@ public class Client extends Thread {
 		outText.append(fromUser + "\n");
 		outText.setCaretPosition(outText.getDocument().getLength());
 		out.println(fromUser);
+	}
+	
+	public static void main(String args[]) {
+		JFrame frame = new JFrame("CP372 A01 Client - chau3120 moha7220");
+		frame.setContentPane(new ClientGUIPanel());
+		frame.setSize (new Dimension (400, 550));
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
 	}
 }

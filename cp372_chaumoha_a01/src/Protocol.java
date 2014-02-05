@@ -23,6 +23,12 @@ public class Protocol {
 	public static final String REMOVE_SUCCESS = "Book(s) removed.\n";
 	public static final String REMOVE_FAIL = "Book(s) not found.\n";
 	
+	/**
+	 * 
+	 * @param command SUBMIT, GET, or REMOVE a book. Anything else is a parse fail.
+	 * @param input The book information preceding the command.
+	 * @return Response based on command and input
+	 */
 	public String processInput(int command, String input){
 		String result = "";
 		switch(command){
@@ -47,6 +53,11 @@ public class Protocol {
 		return result;
 	}
 	
+	/**
+	 * 
+	 * @param input Expecting the TITLE followed by the actualy title, AUTHOR followed by author, and LOCATION followed by location.
+	 * @return Response based on SUBMIT command
+	 */
 	private String submit(String input){
 		
 		Book book = parseInput(input);
@@ -59,6 +70,11 @@ public class Protocol {
 		}	
 	}
 	
+	/**
+	 * 
+	 * @param input Expecting at least one of the three TITLE, AUTHOR or LOCATION, each with the actual value following.
+	 * @return Response based on GET command
+	 */
 	private String get(String input){
 		Book book = parseInput(input);
 		if (book == null || book.allNull()){
@@ -95,6 +111,11 @@ public class Protocol {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param input Expecting at least one of the three TITLE, AUTHOR or LOCATION, each with the actual value following.
+	 * @return Response based on REMOVE command
+	 */
 	private String remove(String input){
 		Book book = parseInput(input);
 		if (book == null || book.allNull()){
@@ -136,6 +157,11 @@ public class Protocol {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param input The string that is checked to be SUBMIT, GET or REMOVE
+	 * @return true if it is one of the three, false if not.
+	 */
 	public static boolean isKeyword(String input){
 		for (int i = 0; i < keywords.length; i++){
 			if (input.equals(keywords[i]))
@@ -144,14 +170,27 @@ public class Protocol {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @return list of books
+	 */
 	public ArrayList<Book> getBooks() {
 		return books;
 	}
 
+	/**
+	 * 
+	 * @param b Book to add to list of books
+	 */
 	public void addBook(Book b) {
 		this.books.add(b);
 	}
 	
+	/**
+	 * 
+	 * @param input The string that is checked to be either TITLE, AUTHOR, or LOCATION
+	 * @return true if it is one of the three, false otherwise
+	 */
 	private static boolean isBookKeyword(String input){
 		for (int i = 0; i < bookKeywords.length; i++){
 			if (input.equals(bookKeywords[i]))
@@ -160,6 +199,11 @@ public class Protocol {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @param b List of books to print from
+	 * @return String of the details of the books in the list
+	 */
 	private String printLocation(ArrayList<Book> b){
 		String result = "";
 		for (int i = 0; i < b.size(); i++){
@@ -172,6 +216,11 @@ public class Protocol {
 		return result;
 	}
 	
+	/**
+	 * 
+	 * @param input Text to be converted into a book if proper format.
+	 * @return a Book, or null if not proper format.
+	 */
 	private Book parseInput(String input){
 		String[] tokens = input.split(" ");
 		

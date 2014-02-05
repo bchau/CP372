@@ -7,13 +7,13 @@ import java.net.Socket;
 
 public class Server {
 
-	private static int portnum = 4444;
+	private static int portnum = 4444; //default portnumber
 
 	public static void main(String[] args) throws IOException {
 		ServerSocket serverSocket = null;
 
 		try {
-			portnum = Integer.parseInt(args[0]);
+			portnum = Integer.parseInt(args[0]); //portnumber entered by commandline if any
 		} catch (Exception e) {
 		}
 
@@ -21,7 +21,7 @@ public class Server {
 			try {
 				serverSocket = new ServerSocket(portnum);
 			} catch (IOException e) {
-				System.err.println("Could not listen on port 4444.");
+				System.err.println("Could not listen on port "+portnum+".");
 				System.exit(1);
 			}
 

@@ -169,7 +169,9 @@ public class Protocol {
 		String result = "";
 		for (int i = 0; i < b.size(); i++){
 			Book book = b.get(i);
-			result += book.getTitle()+"\n"+book.getAuthor()+"\n"+book.getLocation();
+			result += "TITLE "+book.getTitle()+
+					"\nAUTHOR "+book.getAuthor()+
+					"\nLOCATION "+book.getLocation()+"\n";
 			
 		}
 		return result;

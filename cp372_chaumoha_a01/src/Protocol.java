@@ -95,7 +95,7 @@ public class Protocol {
 				return GET_FAIL;
 			}
 			else{
-				return printBooks(bookSearch);
+				return printLocation(bookSearch);
 			}
 		}
 	}
@@ -165,13 +165,11 @@ public class Protocol {
 		return false;
 	}
 	
-	private String printBooks(ArrayList<Book> b){
+	private String printLocation(ArrayList<Book> b){
 		String result = "";
 		for (int i = 0; i < b.size(); i++){
 			Book book = b.get(i);
-			result += "TITLE "+book.getTitle()+
-					"\nAUTHOR "+book.getAuthor()+
-					"\nLOCATION "+book.getLocation()+"\n";
+			result += "LOCATION "+book.getLocation()+"\n";
 			
 		}
 		return result;

@@ -15,7 +15,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-
+/**
+ * Client GUI to interact visually with the server
+ * Features two JTextAreas and two JInputfields for ip and port number
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 @SuppressWarnings("serial")
 public class ClientGUIPanel extends JPanel {
 	private JTextField ipField, portField;
@@ -25,12 +30,16 @@ public class ClientGUIPanel extends JPanel {
 	private JLabel ipLabel, portLabel, inputLabel, resultLabel;
 	private Socket socket = null;
 	private Client client = null;
-
+	/**
+	 * Call super to make the JPanel abilities available here
+	 */
 	public ClientGUIPanel() {
 		super();
 		this.init();
 	}
-
+	/**
+	 * Initialize the Panel and it's children
+	 */
 	private void init() {
 		this.setLayout(new BorderLayout());
 
@@ -56,6 +65,9 @@ public class ClientGUIPanel extends JPanel {
 		sendButton.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				if (client!=null) {
+					client.sendData();
+				}
 			}
 
 			@Override
@@ -72,15 +84,14 @@ public class ClientGUIPanel extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (client!=null) {
-					client.sendData();
-				}
+				
 			}
 		});
 		connectToggle = new JToggleButton("Connect");
 		connectToggle.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				connectDisconnect();
 			}
 
 			@Override
@@ -97,7 +108,7 @@ public class ClientGUIPanel extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				connectDisconnect();
+				
 			}
 		});
 
@@ -126,11 +137,13 @@ public class ClientGUIPanel extends JPanel {
 		interactionPane.add(new JScrollPane(outputArea));
 		this.add(interactionPane, BorderLayout.CENTER);
 	}
-
+	/**
+	 * Determine what must be done to the Toggle Button, setting state and managing connections
+	 */
 	private void connectDisconnect() {
-		if (socket == null && client == null) {
+		if (socket == null && client == null) { // if there is no connection, create one.
 			String err = null;
-			try {
+			try { // try to determine the optimal connection, on error show a nice dialog
 				outputArea.append("Connecting...\n");
 				socket = new Socket(ipField.getText(), new Integer(portField.getText()));
 				

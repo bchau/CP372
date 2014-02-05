@@ -7,7 +7,11 @@ import java.net.Socket;
 
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
-
+/**
+ * Client thread to continuous interaction with the server
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 public class Client extends Thread {
 	private final static int STATE_RUN = 0, STATE_PAUSE = 2, STATE_STOP = 3;
 	private int _state;
@@ -16,7 +20,13 @@ public class Client extends Thread {
 	private BufferedReader in = null;
 	private JTextArea inText, outText;
 	private String fromServer = "", fromUser = "";
-
+	/**
+	 * Create a new Client, which by defninition interacts with a server
+	 * @param s - a socket on which to communicate
+	 * @param i - Input jtextarea
+	 * @param o - output jtextarea
+	 * @throws IOException - thrown if we can not create a buffered reader or print writer
+	 */
 	public Client(Socket s, JTextArea i, JTextArea o) throws IOException {
 		super();
 		socket = s;
@@ -28,10 +38,12 @@ public class Client extends Thread {
 		this.start();
 		System.out.println("Client: Connected");
 	}
-
+	/**
+	 * On every pass get a message from the server
+	 */
 	public void run() {
 		int stateTemp;
-
+		// check state at every pass
 		synchronized (this) {
 			stateTemp = _state;
 		}
@@ -42,6 +54,7 @@ public class Client extends Thread {
 					fromServer = in.readLine();
 					if (fromServer == null)
 						break;
+					// add to the output text area
 					outText.append(fromServer + "\n");
 					outText.setCaretPosition(outText.getDocument().getLength());
 					if (fromServer.equals("Bye."))
@@ -60,27 +73,35 @@ public class Client extends Thread {
 		}
 
 	}
-
+	/*
+	 * Because the stop method is static final we use this to set state to stop
+	 */
 	public synchronized void tStop() {
 		_state = STATE_STOP;
 		System.out.println("Client: Disconnected");
 		// may need to call interrupt() if the processing calls blocking
 		// methods.
 	}
-
+	/**
+	 * Sets this thread's state to pause
+	 */
 	public synchronized void pause() {
 		_state = STATE_PAUSE;
 		// may need to call interrupt() if the processing calls blocking
 		// methods.
 		// perhaps set priority very low with setPriority(MIN_PRIORITY);
 	}
-
+	/**
+	 * Unpauses this thread by setting state to run
+	 */
 	public synchronized void unpause() {
 		_state = STATE_RUN;
 		// perhaps restore priority with setPriority(somePriority);
 		// may need to re-establish any blocked calls interrupted by pause()
 	}
-	
+	/**
+	 * This takes text from the JText area and sends it to the server
+	 */
 	public synchronized void sendData() {
 		fromUser = inText.getText();
 		inText.setText("");
@@ -88,7 +109,10 @@ public class Client extends Thread {
 		outText.setCaretPosition(outText.getDocument().getLength());
 		out.println(fromUser);
 	}
-	
+	/**
+	 * Main client method, create a GUI JFrame here and use GUIPanel as the pane
+	 * @param args from the command line, unused here.
+	 */
 	public static void main(String args[]) {
 		JFrame frame = new JFrame("CP372 A01 Client - chau3120 moha7220");
 		frame.setContentPane(new ClientGUIPanel());

@@ -44,9 +44,6 @@ public class Client extends Thread {
 					outText.setCaretPosition(outText.getDocument().getLength());
 					if (fromServer.equals("Bye."))
 						break;
-					synchronized (this) {
-						_state = STATE_PAUSE;
-					}
 					break;
 				case STATE_PAUSE:
 					yield();
@@ -77,13 +74,16 @@ public class Client extends Thread {
 	}
 
 	public synchronized void unpause() {
+		_state = STATE_RUN;
+		// perhaps restore priority with setPriority(somePriority);
+		// may need to re-establish any blocked calls interrupted by pause()
+	}
+	
+	public synchronized void sendData() {
 		fromUser = inText.getText();
 		inText.setText("");
 		outText.append(fromUser + "\n");
 		outText.setCaretPosition(outText.getDocument().getLength());
 		out.println(fromUser);
-		_state = STATE_RUN;
-		// perhaps restore priority with setPriority(somePriority);
-		// may need to re-establish any blocked calls interrupted by pause()
 	}
 }

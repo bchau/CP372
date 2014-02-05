@@ -75,7 +75,7 @@ public class ClientGUIPanel extends JPanel {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (client!=null) {
-					client.unpause();
+					client.sendData();
 				}
 			}
 		});

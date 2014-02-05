@@ -166,10 +166,10 @@ public class Protocol {
 	}
 	
 	private String printBooks(ArrayList<Book> b){
-		String result = "success"; //temporary string, will remove later
+		String result = "";
 		for (int i = 0; i < b.size(); i++){
 			Book book = b.get(i);
-			result += "\n\n"+book.getTitle()+"\n"+book.getAuthor()+"\n"+book.getLocation();
+			result += book.getTitle()+"\n"+book.getAuthor()+"\n"+book.getLocation();
 			
 		}
 		return result;

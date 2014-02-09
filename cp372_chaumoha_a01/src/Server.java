@@ -7,76 +7,101 @@ import java.net.Socket;
 
 public class Server {
 
-	private static int portnum = 4444; //default portnumber
-
 	public static void main(String[] args) throws IOException {
 		ServerSocket serverSocket = null;
-
-		try {
-			portnum = Integer.parseInt(args[0]); //portnumber entered by commandline if any
+		int portnum;
+		try { // try to convert to a port
+			portnum = Integer.parseInt(args[0]); // portnumber entered by
+													// commandline if any
 		} catch (Exception e) {
+			System.err
+					.println("Invalid port entered, attempting default port 4444.");
+			portnum = 4444;
 		}
-
+		try {
+			serverSocket = new ServerSocket(portnum);
+			System.out.println("Running on port " + serverSocket.getLocalPort());
+		} catch (IOException e) {
+			System.err.println("Could not listen on port " + portnum + ".");
+			try { // try again on error
+				serverSocket = new ServerSocket(0);
+				System.out.println("Listening on port "
+						+ serverSocket.getLocalPort() + ".");
+			} catch (IOException ioe) { // exit if we are unable to allocate a
+										// port
+				System.err.println("Could not listen on port. Exiting...");
+				System.exit(1);
+			}
+		}
 		while (true) {
 			try {
-				serverSocket = new ServerSocket(portnum);
-			} catch (IOException e) {
-				System.err.println("Could not listen on port "+portnum+".");
-				System.exit(1);
+				try { // accept new connections every time and handle them synchronously.
+					new ClientConnection(serverSocket.accept()).run();
+					System.out.println("Accepted new Client");
+				} catch (IOException e) {
+					System.err.println("Accept failed, trying again.");
+				}
+			} catch (Exception e) { // if there is some other error exit
+				serverSocket.close();
+				System.err.println("An error has occured. Exiting.");
+				break;
 			}
+		}
+		System.exit(0);
+	}
 
-			Socket clientSocket = null;
+	private static class ClientConnection implements Runnable {
+		private Socket clientSocket;
+		private PrintWriter out;
+		private String inputLine, outputLine;
+		private Protocol protocol;
+		private BufferedReader in;
+
+		public ClientConnection(Socket s) {
+			this.clientSocket = s;
 			try {
-				clientSocket = serverSocket.accept();
-				System.out.println("Accepted");
+				this.out = new PrintWriter(clientSocket.getOutputStream(), true);
+				this.in = new BufferedReader(new InputStreamReader(
+						clientSocket.getInputStream()));
+				this.protocol = new Protocol();
 			} catch (IOException e) {
-				System.err.println("Accept failed.");
-				System.exit(1);
+				System.err.println("Error creating connection to client.");
 			}
+		}
 
-			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(),
-					true);
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					clientSocket.getInputStream()));
-			String inputLine, outputLine;
-			Protocol protocol = new Protocol();
-
+		public void run() {
 			int code = -1;
-			while ((inputLine = in.readLine()) != null || code != -1) {
-				try {
-					if (inputLine.startsWith("SUBMIT")) {
-						code = Protocol.SUBMIT;
-					} else if (inputLine.startsWith("GET")) {
-						code = Protocol.GET;
-					} else if (inputLine.startsWith("REMOVE")) {
-						code = Protocol.REMOVE;
-					} else {
-						code = Protocol.FAULT;
-					}
+			try {
+				while ((inputLine = in.readLine()) != null || code != -1) {
+					try {
+						if (inputLine.startsWith("SUBMIT")) {
+							code = Protocol.SUBMIT;
+						} else if (inputLine.startsWith("GET")) {
+							code = Protocol.GET;
+						} else if (inputLine.startsWith("REMOVE")) {
+							code = Protocol.REMOVE;
+						} else {
+							code = Protocol.FAULT;
+						}
 
-					String temp;
-					while (in.ready()
-							&& !Protocol.isKeyword(temp = in.readLine())) {
-						inputLine += " " + temp;
-					}
+						String temp;
+						while (in.ready()
+								&& !Protocol.isKeyword(temp = in.readLine())) {
+							inputLine += " " + temp;
+						}
 
-					outputLine = protocol.processInput(code, inputLine);
-					out.println(outputLine);
-					
-				} catch (NullPointerException e) { // on error wait on connection
-					System.out.println("Client was disconnected.");
-					try { // wait on the socket to get data
-						clientSocket = serverSocket.accept();
-						out = new PrintWriter(clientSocket.getOutputStream(),
-								true);
-						in = new BufferedReader(new InputStreamReader(
-								clientSocket.getInputStream()));
-					} catch (IOException ioe) {
-						System.err.println("Unable to accept new connection.");
+						outputLine = protocol.processInput(code, inputLine);
+						out.println(outputLine);
+
+					} catch (NullPointerException e) { // on error end run
+						System.err.println("Client was disconnected.");
+						clientSocket.close();
+						break;
 					}
 				}
+			} catch (IOException e) {
+				System.err.println("Client was disconnected.");
 			}
-			serverSocket.close();
 		}
 	}
 }

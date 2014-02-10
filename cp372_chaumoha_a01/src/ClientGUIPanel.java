@@ -145,8 +145,8 @@ public class ClientGUIPanel extends JPanel {
 			String err = null;
 			try { // try to determine the optimal connection, on error show a nice dialog
 				outputArea.append("Connecting...\n");
+				connectToggle.setText("Connecting");
 				socket = new Socket(ipField.getText(), new Integer(portField.getText()));
-				
 				if (socket != null)
 					client = new Client(socket, inputArea, outputArea);
 				else
@@ -180,6 +180,7 @@ public class ClientGUIPanel extends JPanel {
 		} else {
 			try {
 				outputArea.append("Disconnecting...\n");
+				connectToggle.setText("Disconnecting");
 				client.tStop();
 				client = null;
 				socket.close();

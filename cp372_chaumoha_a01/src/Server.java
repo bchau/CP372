@@ -33,10 +33,12 @@ public class Server {
 				System.exit(1);
 			}
 		}
+		
+		Protocol p = new Protocol();
 		while (true) {
 			try {
 				try { // accept new connections every time and handle them synchronously.
-					new ClientConnection(serverSocket.accept()).run();
+					new ClientConnection(serverSocket.accept(),p).start();
 					System.out.println("Accepted new Client");
 				} catch (IOException e) {
 					System.err.println("Accept failed, trying again.");
@@ -50,20 +52,20 @@ public class Server {
 		System.exit(0);
 	}
 
-	private static class ClientConnection implements Runnable {
+	private static class ClientConnection extends Thread{
 		private Socket clientSocket;
 		private PrintWriter out;
 		private String inputLine, outputLine;
 		private Protocol protocol;
 		private BufferedReader in;
 
-		public ClientConnection(Socket s) {
+		public ClientConnection(Socket s, Protocol p) {
 			this.clientSocket = s;
+			this.protocol = p;
 			try {
 				this.out = new PrintWriter(clientSocket.getOutputStream(), true);
 				this.in = new BufferedReader(new InputStreamReader(
 						clientSocket.getInputStream()));
-				this.protocol = new Protocol();
 			} catch (IOException e) {
 				System.err.println("Error creating connection to client.");
 			}

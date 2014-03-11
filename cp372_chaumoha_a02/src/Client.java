@@ -116,19 +116,24 @@ public class Client extends Thread {
 		//frame.setVisible(true);
 		try {
 			socket = new Socket(args[0], new Integer(args[1]));
-		} catch (NumberFormatException| IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			try{
+				socket = new Socket("127.0.0.1", 999);
+			}
+			catch(NumberFormatException| IOException er){
+				System.out.println("Connection refused");
+			}
 		}
-		if (socket != null)
+		if (socket != null){
 			try {
 				client = new Client(socket);
+				System.out.println("Connected.\n\n");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				System.out.println("Could not create connection, error with host");
 			}
-		else
-			throw new Exception("Could not create connection, error with host");
-		System.out.println("Connected.\n\n");
+		}
+
 	}
 }

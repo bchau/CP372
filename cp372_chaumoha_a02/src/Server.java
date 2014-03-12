@@ -26,7 +26,7 @@ public class Server {
 			throw new Exception("Could not parse commandline args.");
 		}
 		try {
-			serverSocket = new ServerSocket(clientPortNum);
+			serverSocket = new ServerSocket(serverPortNum);
 			System.out.println("Running on port " + serverSocket.getLocalPort());
 		} catch (IOException e) {
 			System.err.println("Could not listen on port " + serverPortNum + ".");

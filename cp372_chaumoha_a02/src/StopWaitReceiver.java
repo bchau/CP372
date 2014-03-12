@@ -1,64 +1,138 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Date;
+import java.net.SocketException;
 
+public class StopWaitReceiver {
 
-public class StopWaitReceiver extends Thread{
-	protected DatagramSocket socket = null;
-    protected BufferedReader in = null;
- 
-    public StopWaitReceiver() throws IOException {
-    }
- 
-    public StopWaitReceiver(String name) throws IOException {
-        super(name);
-        socket = new DatagramSocket(4445);
- 
-        try {
-            in = new BufferedReader(new FileReader("one-liners.txt"));
-        } catch (FileNotFoundException e) {
-            System.err.println("Could not open quote file. Serving time instead.");
-        }
-    }
- 
-    public void run() {
- 
-        while (true) {
-            try {
-                byte[] buf = new byte[128];
- 
-                // receive request
-                DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                socket.receive(packet);
- 
-                // figure out response
-                String dString = new Date().toString();
-                //else
-                //    dString = getNextQuote();
- 
-                buf = dString.getBytes();
- 
-        // send the response to the client at "address" and "port"
-                InetAddress address = packet.getAddress();
-                int port = packet.getPort();
-                packet = new DatagramPacket(buf, buf.length, address, port);
-                socket.send(packet);
-                break;
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-            	continue;
-            }
-        }
-        socket.close();
-    }
-    
-    public static void main(String args[]) throws IOException {
-    	new StopWaitReceiver().start();
-    }
+	public static void main(String[] args) throws Exception {
+		int clientPortNum;
+		int serverPortNum;
+		String senderhost;
+		String fileName; // file to write received data
+
+		if (args.length != 4) {
+			System.err
+					.println("To run the program please enter valid parameters as:");
+			System.err
+					.println("prog <Host Address> <Client Port> <StopWaitReceiver Port> <File Name>");
+			System.exit(1); // exit out
+		}
+		try { // try to parse command line args
+			senderhost = args[0];
+			clientPortNum = Integer.parseInt(args[1]);
+			serverPortNum = Integer.parseInt(args[2]);
+			fileName = args[3];
+
+		} catch (Exception e) {
+			throw new Exception("Could not parse commandline args.");
+		}
+		try {
+			new ServerThread(serverPortNum, fileName).start();
+		} catch (Exception e) { // if there is some other error exit
+			System.err.println("An error has occured. Exiting.");
+		}
+	}
+
+	private static class ServerThread extends Thread {
+		private DatagramSocket datagramSocket;
+		private String outputLine;
+		private String fileName;
+		private boolean reachedEOF = false;
+		public final String SAVE_SUCCESS = "SAVE_SUCCESS";
+		public final String SAVE_FAIL = "SAVE_FAIL";
+
+		public ServerThread(int serverPortNum, String fileName) {
+			try {
+				this.datagramSocket = new DatagramSocket(serverPortNum);
+				this.fileName = fileName;
+				System.out.println("UDP socket created.");
+			} catch (SocketException e) {
+				System.err.println("Could not create socket: " + e);
+			} catch (Exception e) {
+				System.err.println("Unknown error occured: " + e);
+			}
+
+		}
+
+		public byte[] parsePacket(byte[] p) {
+			byte[] data = new byte[124];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = p[i + 4];
+			}
+			return data;
+		}
+
+		public String removeWhiteSpace(String s) {
+			int i;
+			for (i = 0; i < s.length() - 1; i++) {
+				if (s.substring(i, i + 1).equals("\0")) {
+					reachedEOF = true;
+					return s.substring(0, i);
+				}
+			}
+			return s;
+		}
+
+		public void run() {
+			while (true) {
+				byte[] receivedData = new byte[128];
+				byte[] sendData = new byte[128];
+
+				try {
+					if (reachedEOF) {
+						System.out.println("Reached EOF, terminating.");
+						break;
+					}
+					DatagramPacket receivePacket = new DatagramPacket(
+							receivedData, receivedData.length);
+
+					datagramSocket.receive(receivePacket);
+					System.out.println("accepted packet");
+
+					byte[] data = parsePacket(receivePacket.getData());
+					String s = new String(data);
+					s = removeWhiteSpace(s);
+					outputLine = saveInput(fileName, s);
+					System.out.println(outputLine);
+
+					InetAddress address = receivePacket.getAddress();
+					int port = receivePacket.getPort();
+
+					// sendData = createACK(receivedData);
+					for (int i = 0; i < 4; i++) {
+						sendData[i] = receivedData[i];
+					}
+					byte[] ack = "ACK".getBytes();
+					for (int i = 0; i < ack.length; i++) {
+						sendData[i + 4] = ack[i];
+					}
+					DatagramPacket sendPacket = new DatagramPacket(sendData,
+							sendData.length, address, port);
+					datagramSocket.send(sendPacket);
+				} catch (IOException e) {
+					System.err.println("Could not send packet: " + e);
+					break;
+				} catch (Exception e) {
+					System.err.println("Unknown error occured: " + e);
+					break;
+				}
+			}
+			datagramSocket.close();
+		}
+
+		public String saveInput(String fileName, String input) {
+			String result = SAVE_SUCCESS;
+			try {
+				FileWriter writer = new FileWriter(fileName, true);
+				writer.append(input);
+				writer.close();
+			} catch (IOException e) {
+				result = SAVE_FAIL;
+			}
+			return result;
+		}
+	}
 }

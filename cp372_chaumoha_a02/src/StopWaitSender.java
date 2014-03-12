@@ -9,16 +9,15 @@ import java.net.UnknownHostException;
 
 public class StopWaitSender extends Thread {
 	private InetAddress rAddress;
-	private int rPort, sPort, rN, fPointer = 0, cPacket = 1;
-	private final int MAX_BYTES = 124, PACKET_SIZE=128;
+	private int rPort, sPort, rN, fPointer = 0, pPointer = 0, cPacket = 0;
+	private final int MAX_BYTES = 124, PACKET_SIZE = 128;
 	private File f;
 	private DatagramSocket socket = null;
 	private DatagramPacket packet = null;
 	private byte[] fBytes, dBytes;
 	private boolean eof = false, skipPrep = false;
 
-	public StopWaitSender(InetAddress address, int rp, int sp,
-			File fn, int rn) {
+	public StopWaitSender(InetAddress address, int rp, int sp, File fn, int rn) {
 		this.rAddress = address;
 		this.rPort = rp;
 		this.sPort = sp;
@@ -27,7 +26,7 @@ public class StopWaitSender extends Thread {
 		try {
 			readFile(this.f);
 			this.dBytes = new byte[this.PACKET_SIZE];
-		} catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("File is invalid");
 		}
@@ -38,7 +37,8 @@ public class StopWaitSender extends Thread {
 		try {
 			this.socket = new DatagramSocket(this.sPort);
 			this.socket.connect(this.rAddress, this.rPort);
-			System.out.println("Client Running on Port: " + this.socket.getLocalPort());
+			System.out.println("Client Running on Port: "
+					+ this.socket.getLocalPort());
 		} catch (IOException e) {
 			System.err.println("Unable to create socket on port " + sPort);
 			System.exit(1);
@@ -47,83 +47,122 @@ public class StopWaitSender extends Thread {
 			// set data as either 0 or 1 sequence
 			if (!this.eof && !this.skipPrep)
 				prepareDByte();
-			else if(this.skipPrep)
+			else if (this.skipPrep)
 				this.skipPrep = false;
-			else if(this.eof)
+			else if (this.eof)
 				break;
-			// determine if we should drop packet
-			// send packet
-			this.packet = new DatagramPacket(this.dBytes, this.dBytes.length, this.rAddress, this.rPort);
-			try {
-				System.out.println(new String(packet.getData(), 0, packet.getLength()));
-				this.socket.send(this.packet);
-			} catch (IOException e) {
-				System.err.println("Unable to send datagram, retrying...");
-				skipPrep = true;
+			if (!this.eof) {
+				// determine if we should drop packet
+				// send packet
+				this.packet = new DatagramPacket(this.dBytes,
+						this.dBytes.length, this.rAddress, this.rPort);
+				try {
+					System.out.println(new String(packet.getData(), 0, packet
+							.getLength()));
+					this.socket.send(this.packet);
+				} catch (IOException e) {
+					System.err.println("Unable to send datagram, retrying...");
+					skipPrep = true;
+				}
+
+				// get ack from server
+				packet = new DatagramPacket(this.dBytes, this.dBytes.length);
+				try {
+					socket.receive(packet);
+					checkACK(packet.getData());
+					System.out.println(new String(packet.getData(), 0, packet
+							.getLength()));
+				} catch (IOException e) {
+					System.err.println("Error getting ACK, retrying...");
+					skipPrep = true;
+				}
 			}
-			continue;}
-			/*// get ack from server
-			packet = new DatagramPacket(this.dBytes, this.dBytes.length);
-	        try {
-				socket.receive(packet);
-				System.out.println(new String(packet.getData(), 0, packet.getLength()));
-			} catch (IOException e) {
-				System.err.println("Error getting ACK, retrying...");
-				skipPrep = true;
-			}
-			// send next packet, or previous packet
-			break;
-		}*/
+		}
 		this.socket.close();
 		System.out.println("Exiting...");
 		System.exit(0);
 	}
-	
-	private void prepareDByte(){
-		int i;
-		for(i = 0; i < (this.PACKET_SIZE - this.MAX_BYTES - 1); i++) {
-			this.dBytes[i] = 0;
+
+	private void checkACK(byte[] reply) {
+		byte[] ack_packet = new byte[this.PACKET_SIZE];
+		byte[] ack = (this.cPacket + "ACK").getBytes();
+		for (int i = 3; i < ack.length + 3; i++)
+			ack_packet[i] = ack[i - 3];
+		// acknowledged packet
+		if (arrayEqual(reply, ack_packet)) {
+			this.skipPrep = false;
+			if (this.cPacket == 0)
+				this.cPacket = 1;
+			else
+				this.cPacket = 0;
+			if (fPointer >= fBytes.length)
+				this.eof = true;
+		} else
+			this.skipPrep = true;
+	}
+
+	private boolean arrayEqual(byte[] a, byte[] b) {
+		boolean equal = true;
+		int i=0;
+		if (a.length == b.length) {
+			while (equal && i < a.length) {
+				if (a[i] != b[i]) {
+					equal = false;
+				}
+				i++;
+			}
 		}
-		this.dBytes[i] = ("" + this.cPacket).getBytes()[0];
-		i++;
-		while (i < this.dBytes.length && i < fBytes.length){
-			this.dBytes[i] = fBytes[this.fPointer];
+		else equal = false;
+		return equal;
+	}
+
+	private void prepareDByte() {
+		// set sequence number
+		for (this.pPointer = 0; this.pPointer < (this.PACKET_SIZE
+				- this.MAX_BYTES - 1); this.pPointer++) {
+			this.dBytes[this.pPointer] = 0;
+		}
+		this.dBytes[this.pPointer] = ("" + this.cPacket).getBytes()[0];
+		// move over and then begin to add data
+		this.pPointer++;
+		while (this.pPointer < this.dBytes.length
+				&& this.fPointer < fBytes.length) {
+			this.dBytes[this.pPointer] = fBytes[this.fPointer];
 			this.fPointer++;
-			if (fPointer>=fBytes.length){
-				addEOF();
+			this.pPointer++;
+			if (fPointer >= fBytes.length && this.pPointer < this.dBytes.length) {
+				this.dBytes[this.pPointer] = "\0".getBytes()[0];
 				break;
 			}
-			i++;
-		} 
+
+		}
 	}
-	
-	private void addEOF() {
-		this.eof = true;
-	}
-	
+
 	/**
-	 * Implemented from <a href="http://stackoverflow.com/questions/858980/file-to-byte-in-java">
+	 * Implemented from <a
+	 * href="http://stackoverflow.com/questions/858980/file-to-byte-in-java">
 	 * Stack Overflow</a>
+	 * 
 	 * @param file
 	 * @return
 	 * @throws IOException
 	 */
 	private void readFile(File file) throws IOException {
-        // Open file
-        RandomAccessFile f = new RandomAccessFile(file, "r");
-        try {
-            // Get and check length
-            long longlength = f.length();
-            int length = (int) longlength;
-            if (length != longlength)
-                throw new IOException("File size >= 2 GB");
-            // Read file and return data
-            this.fBytes = new byte[length];
-            f.readFully(this.fBytes);
-        } finally {
-            f.close();
-        }
-    }
+		// Open file
+		RandomAccessFile f = new RandomAccessFile(file, "r");
+		try {
+			// Get and check length
+			long longlength = f.length();
+			int length = (int) longlength;
+			if (length != longlength)
+				throw new IOException("File size >= 2 GB");
+			// Read file and return data
+			this.fBytes = new byte[length];
+			f.readFully(this.fBytes);
+		} finally {
+			f.close();
+		}
+	}
 
 	/**
 	 * Sender takes 5 arguments<br/>
@@ -150,13 +189,13 @@ public class StopWaitSender extends Thread {
 		try {
 			new StopWaitSender(InetAddress.getByName(args[0]),
 					Integer.parseInt(args[1]), Integer.parseInt(args[2]),
-					new File(args[3]), Integer.parseInt(args[4]))
-					.start();
+					new File(args[3]), Integer.parseInt(args[4])).start();
 		} catch (UnknownHostException e) {
 			System.err.println("Unable to resolve host, please try again");
 			System.exit(1);
 		} catch (NumberFormatException e) {
-			System.err.println("Invalid port or reliability numbers, please try again");
+			System.err
+					.println("Invalid port or reliability numbers, please try again");
 			System.exit(1);
 		}
 	}

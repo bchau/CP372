@@ -78,7 +78,7 @@ public class Server {
 						byte[] buf = new byte[256];
 						DatagramPacket packet = new DatagramPacket(buf, buf.length);
 						datagramSocket.receive(packet);
-						outputLine = Protocol.saveInput(fileName, inputLine);
+						outputLine = Protocol.saveInput(fileName, buf);
 						out.println(outputLine);
 						
 						InetAddress address = packet.getAddress();

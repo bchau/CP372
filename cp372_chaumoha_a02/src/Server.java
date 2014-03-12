@@ -7,7 +7,6 @@ import java.net.SocketException;
 public class Server {
 
 	public static void main(String[] args) throws Exception{
-		DatagramSocket serverSocket = null;
 		int clientPortNum;
 		int serverPortNum;
 		String senderhost;
@@ -22,26 +21,8 @@ public class Server {
 			throw new Exception("Could not parse commandline args.");
 		}
 		try {
-			serverSocket = new DatagramSocket(serverPortNum);//,InetAddress.getByName(senderhost));
-			System.out.println("Running on port " + serverSocket.getLocalPort());
-		} catch (IOException e) {
-			System.err.println("Could not listen on port " + serverPortNum + ".");
-			try { // try again on error
-				serverSocket = new DatagramSocket(0);
-				System.out.println("Listening on port "
-						+ serverSocket.getLocalPort() + ".");
-			} catch (IOException ioe) { // exit if we are unable to allocate a
-										// port
-				System.err.println("Could not listen on port. Exiting...");
-				System.exit(1);
-			}
-		}
-		
-		
-		try {
-			new ServerThread(clientPortNum,fileName).start();
+			new ServerThread(serverPortNum,fileName).start();
 		} catch (Exception e) { // if there is some other error exit
-			serverSocket.close();
 			System.err.println("An error has occured. Exiting.");
 		}
 	}
@@ -51,9 +32,9 @@ public class Server {
 		private String outputLine;
 		private String fileName;
 
-		public ServerThread(int clientPortNum,String fileName) {
+		public ServerThread(int serverPortNum,String fileName) {
 			try {
-				this.datagramSocket = new DatagramSocket(clientPortNum);
+				this.datagramSocket = new DatagramSocket(serverPortNum);
 				this.fileName = fileName;
 				System.out.println("UDP socket created.");
 			} catch (SocketException e) {

@@ -11,7 +11,7 @@ public class Server {
 
 	//Reference: http://docs.oracle.com/javase/tutorial/networking/datagrams/clientServer.html
 	public static void main(String[] args) throws Exception{
-		ServerSocket serverSocket = null;
+		DatagramSocket serverSocket = null;
 		int clientPortNum;
 		int serverPortNum;
 		String senderhost;
@@ -26,12 +26,12 @@ public class Server {
 			throw new Exception("Could not parse commandline args.");
 		}
 		try {
-			serverSocket = new ServerSocket(serverPortNum);
+			serverSocket = new DatagramSocket(serverPortNum);//,InetAddress.getByName(senderhost));
 			System.out.println("Running on port " + serverSocket.getLocalPort());
 		} catch (IOException e) {
 			System.err.println("Could not listen on port " + serverPortNum + ".");
 			try { // try again on error
-				serverSocket = new ServerSocket(0);
+				serverSocket = new DatagramSocket(0);
 				System.out.println("Listening on port "
 						+ serverSocket.getLocalPort() + ".");
 			} catch (IOException ioe) { // exit if we are unable to allocate a
@@ -41,17 +41,13 @@ public class Server {
 			}
 		}
 		
-		while (true) {
-			try {
-				new ServerThread(clientPortNum,fileName).start();
-				System.out.println("Accepted new Client");
-			} catch (Exception e) { // if there is some other error exit
-				serverSocket.close();
-				System.err.println("An error has occured. Exiting.");
-				break;
-			}
+		
+		try {
+			new ServerThread(clientPortNum,fileName).start();
+		} catch (Exception e) { // if there is some other error exit
+			serverSocket.close();
+			System.err.println("An error has occured. Exiting.");
 		}
-		System.exit(0);
 	}
 
 	private static class ServerThread extends Thread{
@@ -65,36 +61,49 @@ public class Server {
 			try {
 				this.datagramSocket = new DatagramSocket(clientPortNum);
 				//this.out = new PrintWriter(datagramSocket.getOutputStream(), true);
-				this.in = new BufferedReader(new FileReader(fileName));
 			} catch (IOException e) {
 				System.err.println("Error creating connection to client.");
 			}
 		}
 
 		public void run() {
-			try {
-				while ((inputLine = in.readLine()) != null) {
+				while (true){//){(inputLine = in.readLine()) != null) {
 					try {
-						byte[] buf = new byte[256];
-						DatagramPacket packet = new DatagramPacket(buf, buf.length);
-						datagramSocket.receive(packet);
-						outputLine = Protocol.saveInput(fileName, buf);
-						out.println(outputLine);
+						byte[] received = new byte[128];
+						byte[] sendData = new byte[128];
+						DatagramPacket receivePacket = new DatagramPacket(received, received.length);
+						datagramSocket.receive(receivePacket);
+						System.out.println("accepted packet");
 						
-						InetAddress address = packet.getAddress();
-						int port = packet.getPort();
-						packet = new DatagramPacket(buf, buf.length, address, port);
-						datagramSocket.send(packet);
+						String s = receivePacket.getData().toString();
+						outputLine = Protocol.saveInput(fileName, s);
+						System.out.println(outputLine);
+						
+						InetAddress address = receivePacket.getAddress();
+						int port = receivePacket.getPort();
+						
+						for (int i = 0; i < 4; i++){
+							sendData[i] = received[i];
+						}
+						byte[] ack = "ACK".getBytes();
+						for (int i = 0; i < ack.length;i++){
+							sendData[i+4] = ack[i];
+						}
+						DatagramPacket sendPacket = new DatagramPacket(sendData,sendData.length, address, port);
+						datagramSocket.send(sendPacket);
 
 					} catch (NullPointerException e) { // on error end run
 						System.err.println("Client was disconnected.");
 						datagramSocket.close();
 						break;
+						
+					} catch (IOException e) {
+						System.err.println("Could not send packet back");
+					} catch (Exception e){
+						System.err.println("Unknown error");
 					}
 				}
-			} catch (IOException e) {
-				System.err.println("Client was disconnected.");
 			}
-		}
+		
 	}
 }

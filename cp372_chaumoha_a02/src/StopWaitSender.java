@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -8,7 +9,7 @@ import java.net.UnknownHostException;
 
 public class StopWaitSender extends Thread {
 	private InetAddress rAddress;
-	private int rPort, sPort, rN, fPointer = 0, cPacket = 0;
+	private int rPort, sPort, rN, fPointer = 0, cPacket = 1;
 	private final int MAX_BYTES = 124, PACKET_SIZE=128;
 	private File f;
 	private DatagramSocket socket = null;
@@ -36,6 +37,8 @@ public class StopWaitSender extends Thread {
 		// create the new socket then send the file as packets
 		try {
 			this.socket = new DatagramSocket(this.sPort);
+			this.socket.connect(this.rAddress, this.rPort);
+			System.out.println("Client Running on Port: " + this.socket.getLocalPort());
 		} catch (IOException e) {
 			System.err.println("Unable to create socket on port " + sPort);
 			System.exit(1);
@@ -46,6 +49,8 @@ public class StopWaitSender extends Thread {
 				prepareDByte();
 			else if(this.skipPrep)
 				this.skipPrep = false;
+			else if(this.eof)
+				break;
 			// determine if we should drop packet
 			// send packet
 			this.packet = new DatagramPacket(this.dBytes, this.dBytes.length, this.rAddress, this.rPort);
@@ -56,7 +61,8 @@ public class StopWaitSender extends Thread {
 				System.err.println("Unable to send datagram, retrying...");
 				skipPrep = true;
 			}
-			// get ack from server
+			continue;}
+			/*// get ack from server
 			packet = new DatagramPacket(this.dBytes, this.dBytes.length);
 	        try {
 				socket.receive(packet);
@@ -67,7 +73,7 @@ public class StopWaitSender extends Thread {
 			}
 			// send next packet, or previous packet
 			break;
-		}
+		}*/
 		this.socket.close();
 		System.out.println("Exiting...");
 		System.exit(0);
@@ -75,10 +81,11 @@ public class StopWaitSender extends Thread {
 	
 	private void prepareDByte(){
 		int i;
-		for(i = 0; i < (this.PACKET_SIZE - this.MAX_BYTES); i++) {
+		for(i = 0; i < (this.PACKET_SIZE - this.MAX_BYTES - 1); i++) {
 			this.dBytes[i] = 0;
 		}
-		this.dBytes[i] = (byte)this.cPacket;
+		this.dBytes[i] = ("" + this.cPacket).getBytes()[0];
+		i++;
 		while (i < this.dBytes.length && i < fBytes.length){
 			this.dBytes[i] = fBytes[this.fPointer];
 			this.fPointer++;

@@ -1,15 +1,11 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.ServerSocket;
+import java.net.SocketException;
 
 public class Server {
 
-	//Reference: http://docs.oracle.com/javase/tutorial/networking/datagrams/clientServer.html
 	public static void main(String[] args) throws Exception{
 		DatagramSocket serverSocket = null;
 		int clientPortNum;
@@ -52,26 +48,29 @@ public class Server {
 
 	private static class ServerThread extends Thread{
 		private DatagramSocket datagramSocket;
-		private PrintWriter out;
-		private String inputLine, outputLine;
-		private BufferedReader in;
+		private String outputLine;
 		private String fileName;
 
 		public ServerThread(int clientPortNum,String fileName) {
 			try {
 				this.datagramSocket = new DatagramSocket(clientPortNum);
-				//this.out = new PrintWriter(datagramSocket.getOutputStream(), true);
-			} catch (IOException e) {
-				System.err.println("Error creating connection to client.");
+				this.fileName = fileName;
+				System.out.println("UDP socket created.");
+			} catch (SocketException e) {
+				System.err.println("Could not create socket: "+e);
+			} catch (Exception e){
+				System.err.println("Unknown error occured: "+e);
 			}
+			
 		}
 
 		public void run() {
-				while (true){//){(inputLine = in.readLine()) != null) {
+				while (true){
+					byte[] receivedData = new byte[128];
+					byte[] sendData = new byte[128];
+					
 					try {
-						byte[] received = new byte[128];
-						byte[] sendData = new byte[128];
-						DatagramPacket receivePacket = new DatagramPacket(received, received.length);
+						DatagramPacket receivePacket = new DatagramPacket(receivedData, receivedData.length);
 						datagramSocket.receive(receivePacket);
 						System.out.println("accepted packet");
 						
@@ -83,7 +82,7 @@ public class Server {
 						int port = receivePacket.getPort();
 						
 						for (int i = 0; i < 4; i++){
-							sendData[i] = received[i];
+							sendData[i] = receivedData[i];
 						}
 						byte[] ack = "ACK".getBytes();
 						for (int i = 0; i < ack.length;i++){
@@ -91,16 +90,15 @@ public class Server {
 						}
 						DatagramPacket sendPacket = new DatagramPacket(sendData,sendData.length, address, port);
 						datagramSocket.send(sendPacket);
-
-					} catch (NullPointerException e) { // on error end run
-						System.err.println("Client was disconnected.");
+						datagramSocket.close();
+					} catch (IOException e) {
+						System.err.println("Could not send packet: "+e);
 						datagramSocket.close();
 						break;
-						
-					} catch (IOException e) {
-						System.err.println("Could not send packet back");
 					} catch (Exception e){
-						System.err.println("Unknown error");
+						System.err.println("Unknown error occured: "+e);
+						datagramSocket.close();
+						break;
 					}
 				}
 			}

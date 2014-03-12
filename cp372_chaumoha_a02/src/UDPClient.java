@@ -12,7 +12,7 @@ public class UDPClient {
 			theSocket = new DatagramSocket();
  
 			// but if you want to connect to your remote server, then alter the theServer address below
-			InetAddress theServer = InetAddress.getLocalHost();
+			InetAddress theServer = InetAddress.getByName("192.168.5.2");
 			theSocket.connect(theServer,serverPort);
  
 			System.out.println("Client socket created");
@@ -38,13 +38,13 @@ public class UDPClient {
 		inBuffer = new byte[500];
 		outBuffer = new byte[50];
 		try {
-			String message = "genux";
+			String message = "titties";
 			outBuffer = message.getBytes();
  
 			System.out.println("Message sending is : " + message);
  
 			// the server details
-			theServerAddress = theSocket.getLocalAddress();
+			theServerAddress = InetAddress.getByName("192.168.5.2");
  
 			// build up a packet to send to the server
 			theSendPacket = new DatagramPacket(outBuffer, outBuffer.length, theServerAddress, serverPort);

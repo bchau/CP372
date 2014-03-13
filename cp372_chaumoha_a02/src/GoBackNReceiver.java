@@ -97,9 +97,8 @@ public class GoBackNReceiver {
 
 					datagramSocket.receive(receivePacket);
 					
-					byte[] header = new byte[1];
-					header[0] = receivedData[0];
-					if (sequenceNumber == Integer.parseInt(new String(header))){
+					int header = (int)receivedData[0];
+					if (sequenceNumber == header){
 						System.out.println("accepted packet "+sequenceNumber);
 						sequenceNumber++; // increment expected sequence number
 						
@@ -122,7 +121,7 @@ public class GoBackNReceiver {
 						datagramSocket.send(sendPacket);
 					}
 					else{
-						System.out.println("dropped packet "+Integer.parseInt(new String(header)));
+						System.out.println("dropped packet "+ header);
 					}
 				} catch (IOException e) {
 					System.err.println("Could not send packet: " + e);

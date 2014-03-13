@@ -67,10 +67,10 @@ public class StopWaitReceiver {
 
 		public String removeWhiteSpace(String s) {
 			int i;
-			for (i = 0; i < s.length() - 1; i++) {
-				if (s.substring(i, i + 1).equals("\0")) {
+			for (i = 0; i < s.length()-1; i++) {
+				if (s.substring(i,i+1).equals("\\0")) {
 					reachedEOF = true;
-					return s.substring(0, i);
+					return s.substring(0, i-1);
 				}
 			}
 			return s;
@@ -93,15 +93,15 @@ public class StopWaitReceiver {
 					System.out.println("accepted packet");
 
 					byte[] data = parsePacket(receivePacket.getData());
+					//data = removeWhiteSpace(data);
 					String s = new String(data);
 					s = removeWhiteSpace(s);
+					
 					outputLine = saveInput(fileName, s);
-					System.out.println(outputLine);
-
+					
 					InetAddress address = receivePacket.getAddress();
 					int port = receivePacket.getPort();
 
-					// sendData = createACK(receivedData);
 					for (int i = 0; i < 4; i++) {
 						sendData[i] = receivedData[i];
 					}

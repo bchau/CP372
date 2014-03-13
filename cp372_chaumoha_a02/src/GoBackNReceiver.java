@@ -84,8 +84,8 @@ public class GoBackNReceiver {
 			int sequenceNumber = 0;
 			
 			while (true) {
-				byte[] receivedData = new byte[128];
-				byte[] sendData = new byte[128];
+				byte[] receivedData = new byte[125];
+				byte[] sendData = new byte[125];
 
 				try {
 					if (reachedEOF) {

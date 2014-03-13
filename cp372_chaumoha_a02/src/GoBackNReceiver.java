@@ -62,7 +62,7 @@ public class GoBackNReceiver {
 		public byte[] parsePacket(byte[] p) {
 			byte[] data = new byte[124];
 			for (int i = 0; i < data.length; i++) {
-				data[i] = p[i + 4];
+				data[i] = p[i + 1];
 			}
 			return data;
 		}
@@ -109,12 +109,12 @@ public class GoBackNReceiver {
 						InetAddress address = receivePacket.getAddress();
 						int port = receivePacket.getPort();
 
-						for (int i = 0; i < 4; i++) {
+						for (int i = 0; i < 1; i++) {
 							sendData[i] = receivedData[i];
 						}
 						byte[] ack = "ACK".getBytes();
 						for (int i = 0; i < ack.length; i++) {
-							sendData[i + 4] = ack[i];
+							sendData[i + 1] = ack[i];
 						}
 
 						DatagramPacket sendPacket = new DatagramPacket(sendData,

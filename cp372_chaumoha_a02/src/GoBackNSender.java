@@ -18,7 +18,8 @@ public class GoBackNSender extends Thread {
 	private byte[] fBytes, dBytes;
 	private boolean eof = false, skipPrep = false, lastDropped = false;
 
-	public GoBackNSender(InetAddress address, int rp, int sp, File fn, int rn, int ws) {
+	public GoBackNSender(InetAddress address, int rp, int sp, File fn, int rn,
+			int ws) {
 		this.rAddress = address;
 		this.rPort = rp;
 		this.sPort = sp;
@@ -48,59 +49,16 @@ public class GoBackNSender extends Thread {
 			System.exit(1);
 		}
 		while (true) {
-			// set data as either 0 or 1 sequence
+			if (eof) break;
 			prepareDByte();
-			if (!this.eof) {
-				packet = new DatagramPacket(this.dBytes,
-						this.dBytes.length, this.rAddress, this.rPort);
-				try {
-					System.out.println(new String(packet.getData(), 0, packet
-							.getLength()));
-					// determine if we should drop packet
-					switch(this.rN){
-						case 1:
-							if (this.fPointer >= this.fBytes.length) {
-								fPointer = 0;
-								rN = 0;
-								break;
-							} else {
-								System.out.println("Dropped Packet #" + this.sqnce);
-								continue;
-							}
-						case 2: 
-							if (!lastDropped) {
-								System.out.println("Dropped Packet #" + this.sqnce);
-								lastDropped = true;
-								this.skipPrep = true;
-								continue;
-							} else lastDropped = false;
-							break;
-						default:
-					} 
-					// send packet
-					this.socket.send(packet);
-				} catch (IOException e) {
-					System.err.println("Unable to send datagram, retrying...");
-					skipPrep = true;
-				}
-
-				// get ack from server
-				packet = new DatagramPacket(this.dBytes, this.dBytes.length);
-				try {
-					socket.receive(packet);
-					checkACK(packet.getData());
-					System.out.println(new String(packet.getData(), 0, packet
-							.getLength()));
-				} catch (IOException e) {
-					System.err.println("Error getting ACK, retrying...");
-					skipPrep = true;
-				}
-			}
-			break;
+			packet = new DatagramPacket(this.dBytes, this.dBytes.length,
+					this.rAddress, this.rPort);
+			new SendPacket(this.socket, packet).run();
 		}
 		this.socket.close();
 		elapsed = System.currentTimeMillis() - start;
-		System.out.println("Total time to send file: " + elapsed + " miliseconds");
+		System.out.println("Total time to send file: " + elapsed
+				+ " miliseconds");
 		System.out.println("Good Bye.");
 		System.exit(0);
 	}
@@ -111,7 +69,7 @@ public class GoBackNSender extends Thread {
 		for (int i = 3; i < ack.length + 3; i++)
 			ack_packet[i] = ack[i - 3];
 		// acknowledged packet
-		if (arrayEqual(reply, ack_packet)) {
+		if (true) { //arrayEqual(reply, ack_packet)) {
 			this.skipPrep = false;
 			if (this.sqnce == 0)
 				this.sqnce = 1;
@@ -125,7 +83,7 @@ public class GoBackNSender extends Thread {
 
 	private boolean arrayEqual(byte[] a, byte[] b) {
 		boolean equal = true;
-		int i=0;
+		int i = 0;
 		if (a.length == b.length) {
 			while (equal && i < a.length) {
 				if (a[i] != b[i]) {
@@ -133,8 +91,8 @@ public class GoBackNSender extends Thread {
 				}
 				i++;
 			}
-		}
-		else equal = false;
+		} else
+			equal = false;
 		return equal;
 	}
 
@@ -186,6 +144,44 @@ public class GoBackNSender extends Thread {
 		}
 	}
 
+	private class SendPacket implements Runnable {
+		private DatagramPacket myPak;
+		private DatagramSocket theSoc;
+
+		public SendPacket(DatagramSocket s, DatagramPacket d) {
+			this.myPak = d;
+			this.theSoc = s;
+		}
+
+		public void run() {
+			try {
+				System.out.println(new String(this.myPak.getData(), 0,
+						this.myPak.getLength()));
+				// send packet
+				this.theSoc.send(this.myPak);
+				synchronized (sent_packets) {
+					sent_packets.add(this.myPak);
+				}
+			} catch (IOException e) {
+				System.err.println("Unable to send datagram, retrying...");
+				skipPrep = true;
+			}
+			DatagramPacket packet = new DatagramPacket(this.myPak.getData(), this.myPak.getData().length);
+			try {
+				this.theSoc.receive(packet);
+				synchronized (ack_packets) {
+					ack_packets.add(packet);
+				}
+				checkACK(packet.getData());
+				System.out.println(new String(packet.getData(), 0, packet
+						.getLength()));
+			} catch (IOException e) {
+				System.err.println("Error getting ACK, retrying...");
+				skipPrep = true;
+			}
+		}
+	}
+
 	/**
 	 * Sender takes 5 arguments<br/>
 	 * <ol>
@@ -200,18 +196,19 @@ public class GoBackNSender extends Thread {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		if (args.length != 5) {
+		if (args.length != 6) {
 			System.err
 					.println("To run the program please enter valid parameters as:");
 			System.err
-					.println("prog <Host Address> <Host Port> <Local Port> <File Name> <Reliability Number>");
+					.println("prog <Host Address> <Host Port> <Local Port> <File Name> <Reliability Number> <Window Size>");
 			System.exit(1); // exit out
 		}
 		// assume all is well call sender as thread...
 		try {
 			new GoBackNSender(InetAddress.getByName(args[0]),
 					Integer.parseInt(args[1]), Integer.parseInt(args[2]),
-					new File(args[3]), Integer.parseInt(args[4]), Integer.parseInt(args[5])).start();
+					new File(args[3]), Integer.parseInt(args[4]),
+					Integer.parseInt(args[5])).start();
 		} catch (UnknownHostException e) {
 			System.err.println("Unable to resolve host, please try again");
 			System.exit(1);

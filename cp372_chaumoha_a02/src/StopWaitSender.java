@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -15,7 +14,7 @@ public class StopWaitSender extends Thread {
 	private DatagramSocket socket = null;
 	private DatagramPacket packet = null;
 	private byte[] fBytes, dBytes;
-	private boolean eof = false, skipPrep = false;
+	private boolean eof = false, skipPrep = false, lastDropped = false;
 
 	public StopWaitSender(InetAddress address, int rp, int sp, File fn, int rn) {
 		this.rAddress = address;
@@ -33,6 +32,7 @@ public class StopWaitSender extends Thread {
 	}
 
 	public void run() {
+		long start = System.currentTimeMillis(), elapsed;
 		// create the new socket then send the file as packets
 		try {
 			this.socket = new DatagramSocket(this.sPort);
@@ -52,13 +52,34 @@ public class StopWaitSender extends Thread {
 			else if (this.eof)
 				break;
 			if (!this.eof) {
-				// determine if we should drop packet
-				// send packet
 				this.packet = new DatagramPacket(this.dBytes,
 						this.dBytes.length, this.rAddress, this.rPort);
 				try {
 					System.out.println(new String(packet.getData(), 0, packet
 							.getLength()));
+					// determine if we should drop packet
+					switch(this.rN){
+						case 1:
+							if (this.fPointer >= this.fBytes.length) {
+								fPointer = 0;
+								rN = 0;
+								eof = false;
+								break;
+							} else {
+								System.out.println("Dropped Packet #" + this.cPacket);
+								continue;
+							}
+						case 2: 
+							if (!lastDropped) {
+								System.out.println("Dropped Packet #" + this.cPacket);
+								lastDropped = true;
+								this.skipPrep = true;
+								continue;
+							} else lastDropped = false;
+							break;
+						default:
+					} 
+					// send packet
 					this.socket.send(this.packet);
 				} catch (IOException e) {
 					System.err.println("Unable to send datagram, retrying...");
@@ -79,7 +100,9 @@ public class StopWaitSender extends Thread {
 			}
 		}
 		this.socket.close();
-		System.out.println("Exiting...");
+		elapsed = System.currentTimeMillis() - start;
+		System.out.println("Total time to send file: " + elapsed + " miliseconds");
+		System.out.println("Good Bye.");
 		System.exit(0);
 	}
 
@@ -131,7 +154,7 @@ public class StopWaitSender extends Thread {
 			this.fPointer++;
 			this.pPointer++;
 			if (fPointer >= fBytes.length && this.pPointer < this.dBytes.length) {
-				this.dBytes[this.pPointer] = "\0".getBytes()[0];
+				this.dBytes[this.pPointer] = "\\0".getBytes()[0];
 				break;
 			}
 

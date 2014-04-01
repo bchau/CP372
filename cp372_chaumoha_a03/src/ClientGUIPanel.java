@@ -1,20 +1,25 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.border.BevelBorder;
 /**
  * Client GUI to interact visually with the server
  * Features two JTextAreas and two JInputfields for ip and port number
@@ -51,62 +56,9 @@ public class ClientGUIPanel extends JPanel {
 		// init fields
 		ipField = new JTextField("127.0.0.1", 15);
 		portField = new JTextField("4444", 4);
-
-		// init i/o area
-		inputArea = new JTextArea(10, 50);
-		inputArea.setLineWrap(true);
-		outputArea = new JTextArea(10, 50);
-		outputArea.setLineWrap(true);
-		outputArea.setEditable(false);
-
-		// init buttons and events
-		sendButton = new JButton("Send");
-		sendButton.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-			}
-		});
-		connectToggle = new JToggleButton("Connect");
-		connectToggle.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				connectDisconnect();
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-			}
-		});
+		
+		connectToggle = new JToggleButton();
+		connectToggle.setText("connect");
 
 		// create layout
 		JPanel connectionPane = new JPanel();
@@ -117,22 +69,58 @@ public class ClientGUIPanel extends JPanel {
 		connectionPane.add(portField);
 		connectionPane.add(connectToggle);
 		this.add(connectionPane, BorderLayout.NORTH);
-		JPanel interactionPane = new JPanel();
-		interactionPane.setLayout(new BoxLayout(interactionPane,
-				BoxLayout.Y_AXIS));
-		JPanel inputLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		inputLabelPanel.add(inputLabel);
-		interactionPane.add(inputLabelPanel);
-		interactionPane.add(new JScrollPane(inputArea));
-		JPanel sendBPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		sendBPanel.add(sendButton);
-		interactionPane.add(sendBPanel);
-		JPanel resultLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		resultLabelPanel.add(resultLabel);
-		interactionPane.add(resultLabelPanel);
-		interactionPane.add(new JScrollPane(outputArea));
-		this.add(interactionPane, BorderLayout.CENTER);
+		DrawPanel drawPanel = new DrawPanel();
+
+        drawPanel.setBackground(new java.awt.Color(255, 255, 255));
+        drawPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        this.add(drawPanel, BorderLayout.CENTER);
+        this.setVisible(true);
+		
+		 
 	}
+	
+	class DrawPanel extends JPanel implements MouseListener{
+
+        DrawPanel() {
+            // set a preferred size for the custom panel.
+            setPreferredSize(new Dimension(420,420));
+        }
+
+        @Override
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.drawString("Our Whiteboard", 20, 20);
+        }
+
+		@Override
+		public void mouseClicked(MouseEvent arg0) {
+			
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+    }
 	/**
 	 * Determine what must be done to the Toggle Button, setting state and managing connections
 	 */
@@ -187,6 +175,16 @@ public class ClientGUIPanel extends JPanel {
 			}
 
 		}
+	}
+
+	public static void main(String[] args){
+		JFrame frame = new JFrame();
+		frame.setContentPane(new ClientGUIPanel());
+		frame.setSize (new Dimension (1024, 720));
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
 	}
 	
 }

@@ -2,10 +2,9 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -19,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 /**
  * Client GUI to interact visually with the server
@@ -79,7 +80,7 @@ public class ClientGUIPanel extends JPanel {
 		 
 	}
 	
-	class DrawPanel extends JPanel implements MouseListener{
+	class DrawPanel extends JPanel implements MouseMotionListener,MouseListener{
 
         DrawPanel() {
             // set a preferred size for the custom panel.
@@ -117,6 +118,18 @@ public class ClientGUIPanel extends JPanel {
 
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -178,13 +191,39 @@ public class ClientGUIPanel extends JPanel {
 	}
 
 	public static void main(String[] args){
-		JFrame frame = new JFrame();
-		frame.setContentPane(new ClientGUIPanel());
-		frame.setSize (new Dimension (1024, 720));
-		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UIManager.setLookAndFeel(
+                            UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
+                    // use default
+                }
+                /*
+                BasicPaint bp = new BasicPaint();
+
+                JFrame f = new JFrame("White Board");
+                f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                f.setLocationByPlatform(true);
+
+                f.setContentPane(bp.getGui());
+                f.setJMenuBar(bp.getMenuBar(false));
+
+                f.pack();
+                f.setMinimumSize(f.getSize());
+                f.setVisible(true);
+                */
+                JFrame frame = new JFrame("White Board");
+        		frame.setContentPane(new ClientGUIPanel());
+        		frame.setSize (new Dimension (1024, 720));
+        		frame.setResizable(false);
+        		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        		frame.setLocationRelativeTo(null);
+        		frame.setVisible(true);
+            }
+        };
+        SwingUtilities.invokeLater(r);
 	}
 	
 }

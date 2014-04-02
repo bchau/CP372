@@ -1,8 +1,8 @@
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -13,8 +13,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.net.Socket;
+import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -22,14 +22,14 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.border.BevelBorder;
 
 
-public class WhiteBoard {
+public class BlackBoard {
 	//Fields
 	private JTextField ipField, portField;
 	private JTextArea inputArea, outputArea;
@@ -51,11 +51,14 @@ public class WhiteBoard {
     private int windowWidth = 720;
     private int windowHeight = 640;
     
-    //WhiteBoard Preferences
-    private Color textColour = Color.BLACK;
+    //BlackBoard Preferences
+    private Color textColour = Color.WHITE;
     private Color backColour = Color.WHITE;
     private BufferedImage colourSample = new BufferedImage(
             16,16,BufferedImage.TYPE_INT_RGB);
+    private JLabel output = new JLabel("White Board");
+    private ArrayList<Point> points = new ArrayList<Point>();
+    private boolean clickHeld = false;
     
     public JComponent getGui() {
     	if (gui == null){
@@ -87,14 +90,64 @@ public class WhiteBoard {
     		connectionPane.setFloatable(true);
     		gui.add(connectionPane, BorderLayout.NORTH);
     		
-    		//Whiteboard gui
-    		JPanel drawPanel = new JPanel();
-    		imageLabel = new JLabel(new ImageIcon(canvasImage));
-            imageLabel.setPreferredSize(new Dimension(480,320));
-    		drawPanel.add(imageLabel);
-    		
+    		//BlackBoard gui
     		BufferedImage defaultImage = new BufferedImage(windowWidth,windowHeight,BufferedImage.TYPE_INT_RGB);
     		setImage(defaultImage);
+    		JPanel drawPanel = new JPanel();
+    		imageLabel = new JLabel(new ImageIcon(canvasImage));
+            imageLabel.setPreferredSize(new Dimension(this.windowWidth,this.windowHeight));
+    		drawPanel.add(imageLabel);
+    		
+
+            JScrollPane imageScroll = new JScrollPane(drawPanel);
+            drawPanel.add(imageLabel);
+            imageLabel.addMouseMotionListener(new MouseMotionListener(){
+            	@Override
+                public void mouseDragged(MouseEvent arg0) {
+                    points.add(arg0.getPoint());
+
+                    if (points.size() > 1 || clickHeld == true){
+                    	Point initialPoint = points.get(points.size()-1);
+                    	Point finalPoint = points.get(points.size()-2);
+                    	draw(finalPoint,initialPoint);
+                    }
+                    else{
+                    	draw(arg0.getPoint(),null);
+                    }
+                }
+
+                @Override
+                public void mouseMoved(MouseEvent arg0) {
+                	output.setText("X,Y: " + (arg0.getPoint().x+1) + "," + (arg0.getPoint().y+1));
+                }
+            });
+            imageLabel.addMouseListener(new MouseListener(){
+            	@Override
+                public void mousePressed(MouseEvent arg0) {
+            		points.add(arg0.getPoint());
+                    draw(arg0.getPoint(),null);
+                }
+
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+				}
+
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+					clickHeld = false;
+				}
+            });
+            gui.add(imageScroll,BorderLayout.CENTER);
+    		
+    		
     		
             JButton colourButton = new JButton("Colour");
             colourButton.setToolTipText("Choose a Color");
@@ -123,6 +176,7 @@ public class WhiteBoard {
             drawPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
             gui.add(drawPanel, BorderLayout.CENTER);
             */
+    		gui.add(output,BorderLayout.SOUTH);
     	}
     	
     	return gui;
@@ -155,76 +209,38 @@ public class WhiteBoard {
         Graphics2D g = this.canvasImage.createGraphics();
         //g.setRenderingHints(renderingHints);
         g.setColor(textColour);
-        //g.setStroke(stroke);
+        g.setStroke(new BasicStroke(
+                10,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f));
         int n = 0;
         g.drawLine(point.x, point.y, point.x+n, point.y+n);
         g.dispose();
         this.imageLabel.repaint();
     }
     
-    class DrawPanel extends JPanel implements MouseMotionListener,MouseListener{
-
-        DrawPanel() {
-            // set a preferred size for the custom panel.
-            setPreferredSize(new Dimension(windowWidth,windowHeight));
-        }
-
-        @Override
-        public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.drawString("Our Whiteboard", 20, 20);
-        }
-
-		@Override
-		public void mouseClicked(MouseEvent arg0) {
-			
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseExited(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mousePressed(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
+    public void draw(Point initialPoint, Point finalPoint){
+    	Graphics2D g = this.canvasImage.createGraphics();
+        //g.setRenderingHints(renderingHints);
+        g.setColor(textColour);
+        g.setStroke(new BasicStroke(
+                3,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f));
+        if (finalPoint != null)
+        	g.drawLine(initialPoint.x, initialPoint.y, finalPoint.x, finalPoint.y);
+        else
+        	g.drawLine(initialPoint.x, initialPoint.y, initialPoint.x,initialPoint.y);
+        g.dispose();
+        this.imageLabel.repaint();
     }
+    
+
 
     public static void main(String[] args) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                WhiteBoard whiteBoard = new WhiteBoard();
+                BlackBoard blackBoard = new BlackBoard();
 
-                JFrame f = new JFrame("White Board");
-                f.setContentPane(whiteBoard.getGui());
+                JFrame f = new JFrame("Black Board");
+                f.setContentPane(blackBoard.getGui());
 
                 f.pack();
                 f.setMinimumSize(f.getSize());

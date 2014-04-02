@@ -53,10 +53,9 @@ public class BlackBoard {
     
     //BlackBoard Preferences
     private Color textColour = Color.WHITE;
-    private Color backColour = Color.WHITE;
     private BufferedImage colourSample = new BufferedImage(
             16,16,BufferedImage.TYPE_INT_RGB);
-    private JLabel output = new JLabel("White Board");
+    private JLabel output = new JLabel("Black Board");
     private ArrayList<Point> points = new ArrayList<Point>();
     private boolean clickHeld = false;
     
@@ -87,7 +86,7 @@ public class BlackBoard {
     		connectionPane.add(portLabel);
     		connectionPane.add(portField);
     		connectionPane.add(connectToggle);
-    		connectionPane.setFloatable(true);
+    		connectionPane.setFloatable(false);
     		gui.add(connectionPane, BorderLayout.NORTH);
     		
     		//BlackBoard gui
@@ -114,11 +113,12 @@ public class BlackBoard {
                     else{
                     	draw(arg0.getPoint(),null);
                     }
+                    updateHelpText(arg0.getPoint());
                 }
 
                 @Override
                 public void mouseMoved(MouseEvent arg0) {
-                	output.setText("X,Y: " + (arg0.getPoint().x+1) + "," + (arg0.getPoint().y+1));
+                	updateHelpText(arg0.getPoint());
                 }
             });
             imageLabel.addMouseListener(new MouseListener(){
@@ -142,7 +142,9 @@ public class BlackBoard {
 
 				@Override
 				public void mouseReleased(MouseEvent arg0) {
-					clickHeld = false;
+					synchronized(this){
+						clickHeld = false;
+					}
 				}
             });
             gui.add(imageScroll,BorderLayout.CENTER);
@@ -164,18 +166,9 @@ public class BlackBoard {
     		colourButton.addActionListener(textColourListener);
     		colourButton.setIcon(new ImageIcon(colourSample));
     		connectionPane.add(colourButton);
-    		
-    		
-    		//gui.add(tb, BorderLayout.NORTH);
+    		clear(colourSample,textColour);
     		
     		gui.add(drawPanel);
-    		
-    		/*
-            DrawPanel drawPanel = new DrawPanel();
-            drawPanel.setBackground(new java.awt.Color(255, 255, 255));
-            drawPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-            gui.add(drawPanel, BorderLayout.CENTER);
-            */
     		gui.add(output,BorderLayout.SOUTH);
     	}
     	
@@ -231,6 +224,9 @@ public class BlackBoard {
         this.imageLabel.repaint();
     }
     
+    private void updateHelpText(Point point){
+    	output.setText("X,Y: " + (point.x+1) + "," + (point.y+1) +" Points array size: "+ points.size());
+    }
 
 
     public static void main(String[] args) {
@@ -241,7 +237,8 @@ public class BlackBoard {
 
                 JFrame f = new JFrame("Black Board");
                 f.setContentPane(blackBoard.getGui());
-
+                f.setTitle("Black Board");
+                
                 f.pack();
                 f.setMinimumSize(f.getSize());
                 f.setResizable(false);

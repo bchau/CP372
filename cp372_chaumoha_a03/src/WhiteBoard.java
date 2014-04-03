@@ -5,17 +5,19 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -24,6 +26,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -34,15 +37,22 @@ import javax.swing.SwingUtilities;
 
 
 public class WhiteBoard {
+	
+	/** Reference for BufferedImage Drawing:
+	 * 	http://stackoverflow.com/questions/12683533/drawing-a-rectangle-that-wont-disappear-in-next-paint/12683632#12683632
+	 */
 	//Fields
 	private JTextField ipField, portField;
 	private JTextArea inputArea, outputArea;
 	private JButton sendButton;
 	private JToggleButton connectToggle;
 	
-	//Socket/Input Fields
+	//Input Fields
 	private JLabel ipLabel, portLabel, inputLabel, resultLabel;
+	
+	//Connection
 	private Socket socket = null;
+	private Client client = null;
 	
 	//ImageBuffering
     private BufferedImage canvasImage;
@@ -51,8 +61,10 @@ public class WhiteBoard {
     private JPanel gui;
     
     //Window Preferences
-    private int windowWidth = 720;
+    private int windowWidth = 1024;
     private int windowHeight = 640;
+    private int drawAreaWidth = 640;
+    private int drawAreaHeight = 640;
     
     //WhiteBoard Preferences
     private Color textColour = Color.BLACK;
@@ -63,6 +75,10 @@ public class WhiteBoard {
     private ArrayList<Point> temp;
     private boolean clickHeld = false;
     
+    /**
+     * Creates and populates the graphic user interface.
+     * @return a JComponent containing the gui
+     */
     public JComponent getGui() {
     	if (gui == null){
     		gui = new JPanel(new BorderLayout());
@@ -77,9 +93,31 @@ public class WhiteBoard {
     		ipField = new JTextField("127.0.0.1", 15);
     		portField = new JTextField("4444", 4);
     		
-    		connectToggle = new JToggleButton();
-    		connectToggle.setText("connect");
+    		connectToggle = new JToggleButton("Connect");
+    		connectToggle.addMouseListener(new MouseListener() {
+    			@Override
+    			public void mouseReleased(MouseEvent e) {
+    				connectDisconnect();
+    			}
 
+    			@Override
+    			public void mousePressed(MouseEvent e) {
+    			}
+
+    			@Override
+    			public void mouseExited(MouseEvent e) {
+    			}
+
+    			@Override
+    			public void mouseEntered(MouseEvent e) {
+    			}
+
+    			@Override
+    			public void mouseClicked(MouseEvent e) {
+    				
+    			}
+    		});
+    		
     		//Tool Bar
     		JToolBar connectionPane = new JToolBar();
     		connectionPane.setLayout(new FlowLayout());
@@ -92,12 +130,12 @@ public class WhiteBoard {
     		gui.add(connectionPane, BorderLayout.NORTH);
     		
     		//WhiteBoard gui
-    		BufferedImage defaultImage = new BufferedImage(windowWidth,windowHeight,BufferedImage.TYPE_INT_RGB);
+    		BufferedImage defaultImage = new BufferedImage(drawAreaWidth,drawAreaHeight,BufferedImage.TYPE_INT_RGB);
     		setImage(defaultImage);
     		
     		JPanel drawPanel = new JPanel();
     		imageLabel = new JLabel(new ImageIcon(canvasImage));
-            imageLabel.setPreferredSize(new Dimension(this.windowWidth,this.windowHeight));
+            imageLabel.setPreferredSize(new Dimension(this.drawAreaWidth,this.drawAreaHeight));
             imageLabel.addMouseMotionListener(new MouseMotionListener(){
             	@Override
             	public void mouseDragged(MouseEvent arg0) {
@@ -107,7 +145,7 @@ public class WhiteBoard {
             			if (points.size() > 1 ){
             				Point initialPoint = points.get(points.size()-1);
             				Point finalPoint = points.get(points.size()-2);
-            				draw(finalPoint,initialPoint);
+            				draw(initialPoint,finalPoint);
             			}
             			updateHelpText(arg0.getPoint());
             		}
@@ -191,22 +229,35 @@ public class WhiteBoard {
     		
     		gui.add(drawPanel);
     		gui.add(output,BorderLayout.SOUTH);
+    		
+    		outputArea = new JTextArea(10, 20);
+    		outputArea.setLineWrap(true);
+    		outputArea.setEditable(false);
+    		gui.add(new JScrollPane(outputArea),BorderLayout.EAST);
     	}
     	
     	return gui;
     }
     
+    /**
+     * Sets the canvas to the contents of image.
+     * @param image
+     */
     private void setImage(BufferedImage image){
         int w = image.getWidth();
         int h = image.getHeight();
         canvasImage = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g = this.canvasImage.createGraphics();
-        //g.setRenderingHints(renderingHints);
         g.drawImage(image, 0, 0, gui);
         g.dispose();
     }
     
+    /**
+     * Clears the area of the buffered image to the specified colour.
+     * @param bi
+     * @param colour
+     */
     private void clear(BufferedImage bi,Color colour) {
         Graphics2D g = bi.createGraphics();
         g.setColor(colour);
@@ -214,6 +265,11 @@ public class WhiteBoard {
         g.dispose();
     }
     
+    /**
+     * Draws a line of 'textColour' between the two points
+     * @param initialPoint
+     * @param finalPoint
+     */
     private void draw(Point initialPoint, Point finalPoint){
     	Graphics2D g = this.canvasImage.createGraphics();
         //g.setRenderingHints(renderingHints);
@@ -228,28 +284,93 @@ public class WhiteBoard {
         this.imageLabel.repaint();
     }
     
+    /**
+     * Updates the help text, which contains x&y coordinates and information about the point buffer.
+     * @param point
+     */
     private void updateHelpText(Point point){
     	output.setText("X,Y: " + (point.x+1) + "," + (point.y+1) +" Points array size: "+ points.size());
     }
 
+    /**
+	 * Determine what must be done to the Toggle Button, setting state and managing connections
+	 */
+	private void connectDisconnect() {
+		
+		if (socket == null && client == null) { // if there is no connection, create one.
+			outputArea.append("Connecting...\n");
+			connectToggle.setText("Connecting");
+			SwingUtilities.invokeLater(new Runnable() {
+			    public void run() {
+			    	try { // try to determine the optimal connection, on error show a nice dialog
+						socket = new Socket(ipField.getText(), new Integer(portField.getText()));
+						if (socket != null)
+							client = new Client(socket, inputArea, outputArea);
+						else
+							throw new Exception("Could not create connection, error with host");
+						connectToggle.setText("Disconnect");
+						connectToggle.setSelected(false);
+						outputArea.append("Connected.\n\n");
+						//connectToggle.setSelected(true);
+					} catch (UnknownHostException e) {
+						connectToggle.setText("Connect");
+						connectToggle.setSelected(false);
+						outputArea.append("Could not find host.\n");
+					} catch (NumberFormatException e) {
+						connectToggle.setText("Connect");
+						connectToggle.setSelected(false);
+						outputArea.append("Please ensure port number is correct.\n");
+					} catch (IOException e) {
+						connectToggle.setText("Connect");
+						connectToggle.setSelected(false);
+						outputArea.append("Could not connect.\n");
+					} catch (Exception e) {
+						connectToggle.setText("Connect");
+						connectToggle.setSelected(false);
+						outputArea.append(e.getMessage()+"\n");
+					}
+			    }
+			});
+		} else {
+			outputArea.append("Disconnecting...\n");
+			connectToggle.setText("Disconnecting");
+			SwingUtilities.invokeLater(new Runnable() {
+			    public void run() {
+			    	try {
+						client.tStop();
+						client = null;
+						socket.close();
+						socket = null;
+						connectToggle.setText("Connect");
+						connectToggle.setSelected(false);
+						outputArea.append("Disconnected.\n\n");
+					} catch (Exception e) {
+						connectToggle.setText("Disconnect");
+						connectToggle.setSelected(true);
+					}
+			    }
+			});
+		}
+	}
     public static void main(String[] args) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                WhiteBoard whiteBoard = new WhiteBoard();
+    	SwingUtilities.invokeLater(new Runnable() {
+    	    public void run() {
+    	    	WhiteBoard whiteBoard = new WhiteBoard();
 
-                JFrame f = new JFrame("White Board");
-                f.setContentPane(whiteBoard.getGui());
-                f.setTitle("White Board");
-                
-                f.pack();
-                f.setMinimumSize(f.getSize());
-                f.setResizable(false);
-        		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        		f.setLocationRelativeTo(null);
-                f.setVisible(true);
-            }
-        };
-        r.run();
+    	    	JFrame f = new JFrame("White Board");
+    	    	f.setContentPane(whiteBoard.getGui());
+
+    	    	f.pack();
+    	    	f.setMinimumSize(f.getSize());
+    	    	f.setResizable(false);
+    	    	f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	    	f.setLocationRelativeTo(null);
+    	    	f.setVisible(true);
+    	    }
+    	});
+    	
+
     }
+
+    
 }

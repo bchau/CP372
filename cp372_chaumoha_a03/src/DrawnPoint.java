@@ -2,15 +2,17 @@ import java.awt.Point;
 import java.io.Serializable;
 
 public class DrawnPoint extends Point implements Serializable{
-	boolean isFirstPoint;
+	private static final long serialVersionUID = 1L;
 
-	public DrawnPoint(int x, int y, boolean isFirstPoint){
+	public DrawnPoint(int x, int y){
 		super(x,y);
-		this.isFirstPoint = isFirstPoint;
 	}
 
-	public DrawnPoint(Point p, boolean isFirstPoint){
+	public DrawnPoint(Point p){
 		super(p);
-		this.isFirstPoint = isFirstPoint;
+	}
+	
+	public String toString(){
+		return ""+x+","+y;
 	}
 }

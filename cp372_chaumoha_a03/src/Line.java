@@ -1,50 +1,42 @@
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 
 public class Line implements Serializable{
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-	int size;
 	ArrayList<DrawnPoint> points;
+	int strokeSize;
+	String colourRGB;
 	
-	public Line(ArrayList<DrawnPoint> points, int size){
-		this.size = size;
+	public Line(ArrayList<DrawnPoint> points, int s, String colourRGB){
 		this.points = points;
+		this.strokeSize = s;
+		this.colourRGB = colourRGB;
 	}
 	
-	public static String serialize(DrawnPoint point) {
-	    try {
-	        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-	        ObjectOutputStream so = new ObjectOutputStream(bo);
-	        so.writeObject(point);
-	        so.flush();
-	        // This encoding induces a bijection between byte[] and String (unlike UTF-8)
-	        return bo.toString("ISO-8859-1");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-		return null;
+	public String toString(){
+		String result = "LINE,";
+		result+=strokeSize+",";
+		result+=colourRGB+";";
+		for (int i = 0; i < points.size();i++){
+			result+=points.get(i).toString()+";";
+		}
+		result+="ENDLINE";
+		return result;
 	}
 	
-	public static DrawnPoint deserialize(String str) {
-	    // deserialize the object
-	    try {
-	        // This encoding induces a bijection between byte[] and String (unlike UTF-8)
-	        byte b[] = str.getBytes("ISO-8859-1"); 
-	        ByteArrayInputStream bi = new ByteArrayInputStream(b);
-	        ObjectInputStream si = new ObjectInputStream(bi);
-	        return (DrawnPoint)si.readObject();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-		return null;
+	public static Line parseLine(String s){
+		String[] tokens = s.split(";");
+		String[] first = tokens[0].split(",");
+		int strokeSize = Integer.parseInt(first[1]);
+		String colourRGB = first[2];
+		
+		ArrayList<DrawnPoint> p = new ArrayList<DrawnPoint>();
+		for (int i = 1; i < tokens.length; i++){
+			String[] temp = tokens[i].split(",");
+			p.add(new DrawnPoint(Integer.parseInt(temp[0]),Integer.parseInt(temp[1])));
+		}
+		return new Line(p,strokeSize,colourRGB);
 	}
 }

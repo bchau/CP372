@@ -80,9 +80,7 @@ public class WhiteBoard {
     		connectToggle = new JToggleButton();
     		connectToggle.setText("connect");
 
-    		//Tool Bars
-    		//JPanel toolbar = 
-    		
+    		//Tool Bar
     		JToolBar connectionPane = new JToolBar();
     		connectionPane.setLayout(new FlowLayout());
     		connectionPane.add(ipLabel);
@@ -100,19 +98,13 @@ public class WhiteBoard {
     		JPanel drawPanel = new JPanel();
     		imageLabel = new JLabel(new ImageIcon(canvasImage));
             imageLabel.setPreferredSize(new Dimension(this.windowWidth,this.windowHeight));
-    		drawPanel.add(imageLabel);
-    		clear(canvasImage,Color.white);
-    		
-
-            JScrollPane imageScroll = new JScrollPane(drawPanel);
-            drawPanel.add(imageLabel);
             imageLabel.addMouseMotionListener(new MouseMotionListener(){
             	@Override
             	public void mouseDragged(MouseEvent arg0) {
-            		if (SwingUtilities.isLeftMouseButton(arg0)){
+            		if (SwingUtilities.isLeftMouseButton(arg0)&& clickHeld == true){
             			points.add(arg0.getPoint());
 
-            			if (points.size() > 1 && clickHeld == true){
+            			if (points.size() > 1 ){
             				Point initialPoint = points.get(points.size()-1);
             				Point finalPoint = points.get(points.size()-2);
             				draw(finalPoint,initialPoint);
@@ -170,6 +162,12 @@ public class WhiteBoard {
 					}
 				}
             });
+            drawPanel.add(imageLabel);
+    		clear(canvasImage,Color.white);
+    		
+
+            JScrollPane imageScroll = new JScrollPane(drawPanel);
+            drawPanel.add(imageLabel);
             gui.add(imageScroll,BorderLayout.CENTER);
     		
     		

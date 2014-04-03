@@ -66,6 +66,7 @@ public class WhiteBoard {
     
     //WhiteBoard Preferences
     private Color textColour = Color.BLACK;
+    private final boolean ENABLED_TEXT_COLOUR_SELECTION = true;
     private BufferedImage colourSample = new BufferedImage(
             16,16,BufferedImage.TYPE_INT_RGB);
     private JLabel output = new JLabel("White Board");
@@ -74,9 +75,7 @@ public class WhiteBoard {
     private ArrayList<DrawnPoint> pointsSent;
     private boolean clickHeld = false;
     private int penSize = 3;
-    private Stroke stroke = new BasicStroke(
-            penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
-    
+    private Stroke stroke = new BasicStroke(penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
     
     /**
      * Creates and populates the graphic user interface.
@@ -234,11 +233,7 @@ public class WhiteBoard {
                     Object o = strokeModel.getValue();
        
                     penSize = (Integer)o; 
-                    stroke = new BasicStroke(
-                            penSize,
-                            BasicStroke.CAP_ROUND,
-                            BasicStroke.JOIN_ROUND,
-                            1.7f);
+                    stroke = new BasicStroke(penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND, 1.7f);
                 }
             };
             strokeSize.addChangeListener(strokeListener);
@@ -246,17 +241,19 @@ public class WhiteBoard {
             
             JButton colourButton = new JButton("Colour");
             colourButton.setToolTipText("Choose a Color");
-            ActionListener textColourListener = new ActionListener() {
-                public void actionPerformed(ActionEvent arg0) {
-                    Color c = JColorChooser.showDialog(
-                            gui, "Choose a color", textColour);
-                    if (c!=null) {
-                    	textColour = c;
-                    	clear(colourSample,c);
-                    }
-                }
-            };
-    		colourButton.addActionListener(textColourListener);
+            if (this.ENABLED_TEXT_COLOUR_SELECTION){
+            	ActionListener textColourListener = new ActionListener() {
+            		public void actionPerformed(ActionEvent arg0) {
+            			Color c = JColorChooser.showDialog(
+            					gui, "Choose a color", textColour);
+            			if (c!=null) {
+            				textColour = c;
+            				clear(colourSample,c);
+            			}
+            		}
+            	};
+            	colourButton.addActionListener(textColourListener);
+            }
     		colourButton.setIcon(new ImageIcon(colourSample));
     		connectionPane.add(colourButton);
     		clear(colourSample,textColour);

@@ -14,6 +14,7 @@ class Client extends Thread{
     	private BufferedReader in = null;
     	private JTextArea inText, outText;
     	private String fromServer = "", fromUser = "";
+    	public final String SEND_PASSWORD = "WBPASSWORD;password";
     	/**
     	 * Create a new Client, which by defninition interacts with a server
     	 * @param s - a socket on which to communicate
@@ -99,9 +100,7 @@ class Client extends Thread{
     	public synchronized void sendData(String request) {
     		out.println(request);
     	}
-    	/**
-    	 * Main client method, create a GUI JFrame here and use GUIPanel as the pane
-    	 * @param args from the command line, unused here.
-    	 */
+    	
+    	
     	
     }

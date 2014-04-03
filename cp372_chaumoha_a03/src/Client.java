@@ -16,6 +16,7 @@ class Client extends Thread{
     	private Socket socket = null;
     	private PrintWriter out = null;
     	private BufferedReader in = null;
+    	private WhiteBoard wb = null;
     	private JTextArea inText, outText;
     	private String fromServer = "", fromUser = "";
     	public final String SEND_PASSWORD = "WBPASSWORD;password";
@@ -26,8 +27,9 @@ class Client extends Thread{
     	 * @param o - output jtextarea
     	 * @throws IOException - thrown if we can not create a buffered reader or print writer
     	 */
-    	public Client(Socket s, JTextArea o) throws IOException {
+    	public Client(Socket s, JTextArea o,WhiteBoard wb) throws IOException {
     		super();
+    		this.wb = wb;
     		socket = s;
     		out = new PrintWriter(socket.getOutputStream(), true);
     		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -55,6 +57,8 @@ class Client extends Thread{
     						break;
     					// add to the output text area
     					outText.append(fromServer + "\n");
+    					
+    					wb.drawLine(Line.parseLine(fromServer));
     					outText.setCaretPosition(outText.getDocument().getLength());
     					if (fromServer.equals("Bye."))
     						synchronized (this) {

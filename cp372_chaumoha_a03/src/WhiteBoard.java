@@ -155,7 +155,7 @@ public class WhiteBoard {
             			if (points.size() > 1 ){
             				Point initialPoint = points.get(points.size()-1);
             				Point finalPoint = points.get(points.size()-2);
-            				draw(initialPoint,finalPoint);
+            				draw(initialPoint,finalPoint,textColour,stroke);
             			}
             			updateHelpText(arg0.getPoint());
             		}
@@ -178,7 +178,7 @@ public class WhiteBoard {
             			pointsSent.add(new DrawnPoint(arg0.getPoint()));
 
             			updateHelpText(arg0.getPoint());
-            			draw(arg0.getPoint(),null);
+            			draw(arg0.getPoint(),null,textColour,stroke);
             			synchronized(this){ clickHeld = true; }
             		}
                     else if (SwingUtilities.isRightMouseButton(arg0)){
@@ -309,11 +309,11 @@ public class WhiteBoard {
      * @param initialPoint
      * @param finalPoint
      */
-    private void draw(Point initialPoint, Point finalPoint){
+    private void draw(Point initialPoint, Point finalPoint,Color c, Stroke s){
     	Graphics2D g = this.canvasImage.createGraphics();
         //g.setRenderingHints(renderingHints);
-        g.setColor(textColour);
-        g.setStroke(stroke);
+        g.setColor(c);
+        g.setStroke(s);
         if (finalPoint != null)
         	g.drawLine(initialPoint.x, initialPoint.y, finalPoint.x, finalPoint.y);
         else
@@ -343,7 +343,7 @@ public class WhiteBoard {
 			    	try { // try to determine the optimal connection, on error show a nice dialog
 			    		socket = new Socket(ipField.getText(), new Integer(portField.getText()));
 						if (socket != null)
-							client = new Client(socket, outputArea);
+							client = new Client(socket, outputArea,WhiteBoard.this);
 						else
 							throw new Exception("Could not create connection, error with host");
 						connectToggle.setText("Disconnect");
@@ -413,6 +413,16 @@ public class WhiteBoard {
     	
 
     }
+
+	public void drawLine(final Line line) {
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				for(int i = 1; i < line.points.size(); i++)
+					draw(line.points.get(i-1), line.points.get(i),line.colourRGB, 
+							new BasicStroke(line.strokeSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f));
+			}
+		});
+	}
 
     
 }

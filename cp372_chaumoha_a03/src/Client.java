@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Socket;
 
-import javax.net.ssl.SSLSocket;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
@@ -14,8 +14,7 @@ class Client extends Thread{
     	private final static int STATE_RUN = 0, STATE_PAUSE = 2, STATE_STOP = 3;
     	private int _state;
     	private Socket socket = null;
-    	//private PrintWriter out = null;
-    	private BufferedWriter out = null;
+    	private PrintWriter out = null;
     	private BufferedReader in = null;
     	private JTextArea inText, outText;
     	private String fromServer = "", fromUser = "";
@@ -27,19 +26,12 @@ class Client extends Thread{
     	 * @param o - output jtextarea
     	 * @throws IOException - thrown if we can not create a buffered reader or print writer
     	 */
-    	public Client(SSLSocket s, JTextArea o) throws IOException {
+    	public Client(Socket s, JTextArea o) throws IOException {
     		super();
-    		System.setProperty("https.protocols", "TLSv1");
-    		this.socket = s;
-    		//out = new PrintWriter(this.socket.getOutputStream(), true);
-    		OutputStream outputstream = socket.getOutputStream();
-            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(outputstream);
-            out = new BufferedWriter(outputstreamwriter);
-            out.write("HELLO");
-            out.flush();
-            
-            in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-       		outText = o;
+    		socket = s;
+    		out = new PrintWriter(socket.getOutputStream(), true);
+    		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    		outText = o;
     		_state = STATE_RUN;
     		this.start();
     		System.out.println("Client: Connected");
@@ -115,13 +107,7 @@ class Client extends Thread{
     	public synchronized void sendData(final String request) {
     		SwingUtilities.invokeLater(new Runnable() {
 			    public void run() {
-			    	try {
-						out.write(request);
-						out.flush();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					out.println(request);
 			    }
     		});
     	}

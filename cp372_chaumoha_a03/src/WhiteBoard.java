@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -57,14 +58,10 @@ public class WhiteBoard {
 	private JLabel ipLabel, portLabel;
 	
 	//Connection
-	private SSLSocket socket = null;
-	private SSLSocketFactory sslsocketfactory = null;
-	private KeyStore keyStore = null;
-	private TrustManagerFactory tmf = null;
-	private SSLContext ctx = null;
+	private Socket socket = null;
+	private SocketFactory socketfactory = null;
 	private Client client = null;
-	private static String certPath = "WBPClientKeystore";
-	private static char[] passphrase = "wbp123".toCharArray();
+
 	
 	//ImageBuffering
     private BufferedImage canvasImage;
@@ -217,6 +214,9 @@ public class WhiteBoard {
 						}
 
 						String s = new Line(pointsSent,penSize,getColourHex(textColour.getRed(),textColour.getGreen(),textColour.getBlue())).toString();
+						String a = getColourHex(textColour.getRed(),textColour.getGreen(),textColour.getBlue());
+						Color b = getColourFromHex(a);
+						String c = getColourHex(b.getRed(),b.getGreen(),b.getBlue());
 						outputArea.append(s);
 
 
@@ -345,22 +345,14 @@ public class WhiteBoard {
 			SwingUtilities.invokeLater(new Runnable() {
 			    public void run() {
 			    	try { // try to determine the optimal connection, on error show a nice dialog
-			    		keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-						keyStore.load(new FileInputStream(certPath), passphrase);
-
-						tmf = TrustManagerFactory
-								.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-						tmf.init(keyStore);
-						ctx = SSLContext.getInstance("SSL");
-						ctx.init(null, tmf.getTrustManagers(), null);
-						sslsocketfactory = ctx.getSocketFactory();
-						socket = (SSLSocket) sslsocketfactory.createSocket(ipField.getText(), new Integer(portField.getText()));
+			    		socket = new Socket(ipField.getText(), new Integer(portField.getText()));
 						if (socket != null)
 							client = new Client(socket, outputArea);
 						else
 							throw new Exception("Could not create connection, error with host");
 						connectToggle.setText("Disconnect");
 						connectToggle.setSelected(false);
+						outputArea.append("Connected.\n\n");
 						outputArea.append("Connected.\n\n");
 						
 						//connectToggle.setSelected(true);
@@ -408,6 +400,18 @@ public class WhiteBoard {
 	
 	public String getColourHex(int r, int g, int b){
 		return String.format("#%02x%02x%02x", r, g, b);
+	}
+	
+	public Color getColourFromHex(String s){
+		String a = s.substring(1,3);
+		String d = s.substring(3,5);
+		String c = s.substring(5,7);
+		
+		int r = a.getBytes()[0];
+		int g = new Integer(s.substring(3,4));
+		int b = new Integer(s.substring(5,6));
+		
+		return new Color(r,g,b);
 	}
     public static void main(String[] args) {
     	SwingUtilities.invokeLater(new Runnable() {

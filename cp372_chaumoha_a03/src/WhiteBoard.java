@@ -213,12 +213,8 @@ public class WhiteBoard {
 							clickHeld = false;
 						}
 
-						String s = new Line(pointsSent,penSize,getColourHex(textColour.getRed(),textColour.getGreen(),textColour.getBlue())).toString();
-						String a = getColourHex(textColour.getRed(),textColour.getGreen(),textColour.getBlue());
-						Color b = getColourFromHex(a);
-						String c = getColourHex(b.getRed(),b.getGreen(),b.getBlue());
+						String s = new Line(pointsSent,penSize,textColour).toString();
 						outputArea.append(s);
-
 
 						try{
 							client.sendData(s);
@@ -398,21 +394,6 @@ public class WhiteBoard {
 		}
 	}
 	
-	public String getColourHex(int r, int g, int b){
-		return String.format("#%02x%02x%02x", r, g, b);
-	}
-	
-	public Color getColourFromHex(String s){
-		String a = s.substring(1,3);
-		String d = s.substring(3,5);
-		String c = s.substring(5,7);
-		
-		int r = a.getBytes()[0];
-		int g = new Integer(s.substring(3,4));
-		int b = new Integer(s.substring(5,6));
-		
-		return new Color(r,g,b);
-	}
     public static void main(String[] args) {
     	SwingUtilities.invokeLater(new Runnable() {
     	    public void run() {

@@ -87,9 +87,9 @@ public class Server {
 						Line l = null;
 						if (inputLine.startsWith("LINE") && inputLine.endsWith("ENDLINE")) {
 							l = Line.parseLine(inputLine);
-							//l.colourRGB
+							l.strokeSize = 10;
+							out.println(l);
 						}
-						out.println("");
 
 					} catch (NullPointerException e) { // on error end run
 						System.err.println("Client was disconnected.");

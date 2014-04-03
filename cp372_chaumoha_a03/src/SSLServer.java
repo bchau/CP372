@@ -136,25 +136,7 @@ public class SSLServer {
 			try {
 				while ((inputLine = in.readLine()) != null || code != -1) {
 					try {
-						if (inputLine.startsWith("SUBMIT")) {
-							code = WhiteBoardProtocol.SUBMIT;
-						} else if (inputLine.startsWith("GET")) {
-							//code = WhiteBoardProtocol.GET;
-						} else if (inputLine.startsWith("REMOVE")) {
-							//code = WhiteBoardProtocol.REMOVE;
-						} else {
-							code = WhiteBoardProtocol.FAULT;
-						}
-
-						String temp;
-						while (in.ready()
-								&& !WhiteBoardProtocol.isKeyword(temp = in
-										.readLine())) {
-							inputLine += " " + temp;
-						}
-
-						outputLine = protocol.processInput(code, inputLine);
-						out.println(outputLine);
+						
 
 					} catch (NullPointerException e) { // on error end run
 						System.err.println("Client was disconnected.");

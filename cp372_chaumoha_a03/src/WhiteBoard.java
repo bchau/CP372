@@ -45,12 +45,10 @@ public class WhiteBoard {
 	private Socket socket = null;
 	
 	//ImageBuffering
-    private BufferedImage originalImage;
     private BufferedImage canvasImage;
-    private Raster lastImage;
+    private Raster tempImageDetails;
     private JLabel imageLabel;
     private JPanel gui;
-    private Rectangle selection;
     
     //Window Preferences
     private int windowWidth = 720;
@@ -114,13 +112,10 @@ public class WhiteBoard {
             		if (SwingUtilities.isLeftMouseButton(arg0)){
             			points.add(arg0.getPoint());
 
-            			if (points.size() > 1 || clickHeld == true){
+            			if (points.size() > 1 && clickHeld == true){
             				Point initialPoint = points.get(points.size()-1);
             				Point finalPoint = points.get(points.size()-2);
             				draw(finalPoint,initialPoint);
-            			}
-            			else{
-            				draw(arg0.getPoint(),null);
             			}
             			updateHelpText(arg0.getPoint());
             		}
@@ -137,17 +132,21 @@ public class WhiteBoard {
             		if (SwingUtilities.isLeftMouseButton(arg0)){
             			temp = new ArrayList<Point>();
             			temp.addAll(points);
-            			lastImage = canvasImage.getData();
+            			tempImageDetails = canvasImage.getData();
             			points.add(arg0.getPoint());
+            			updateHelpText(arg0.getPoint());
             			draw(arg0.getPoint(),null);
             			synchronized(this){ clickHeld = true; }
             		}
                     else if (SwingUtilities.isRightMouseButton(arg0)){
                     	if (clickHeld){
-                    		canvasImage.setData(lastImage);
+                    		canvasImage.setData(tempImageDetails);
                     		imageLabel.repaint();
                     		points = temp;
                     		updateHelpText(arg0.getPoint());
+                    		synchronized(this){
+        						clickHeld = false;
+        					}
                     	}
                     }
                 }
@@ -200,7 +199,6 @@ public class WhiteBoard {
     }
     
     private void setImage(BufferedImage image){
-    	this.originalImage = image;
         int w = image.getWidth();
         int h = image.getHeight();
         canvasImage = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
@@ -209,11 +207,7 @@ public class WhiteBoard {
         //g.setRenderingHints(renderingHints);
         g.drawImage(image, 0, 0, gui);
         g.dispose();
-        
-        selection = new Rectangle(0,0,w,h); 
     }
-    
-    /** Clears the entire image area by painting it with the current color. */
     
     private void clear(BufferedImage bi,Color colour) {
         Graphics2D g = bi.createGraphics();
@@ -222,7 +216,7 @@ public class WhiteBoard {
         g.dispose();
     }
     
-    public void draw(Point initialPoint, Point finalPoint){
+    private void draw(Point initialPoint, Point finalPoint){
     	Graphics2D g = this.canvasImage.createGraphics();
         //g.setRenderingHints(renderingHints);
         g.setColor(textColour);
@@ -238,13 +232,6 @@ public class WhiteBoard {
     
     private void updateHelpText(Point point){
     	output.setText("X,Y: " + (point.x+1) + "," + (point.y+1) +" Points array size: "+ points.size());
-    }
-
-    static BufferedImage deepCopy(BufferedImage bi) {
-    	 ColorModel cm = bi.getColorModel();
-    	 boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
-    	 WritableRaster raster = bi.copyData(null);
-    	 return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
 
     public static void main(String[] args) {

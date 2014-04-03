@@ -94,14 +94,10 @@ class Client extends Thread{
     		// may need to re-establish any blocked calls interrupted by pause()
     	}
     	/**
-    	 * This takes text from the JText area and sends it to the server
+    	 * This takes text and sends it to the server
     	 */
-    	public synchronized void sendData() {
-    		fromUser = inText.getText();
-    		inText.setText("");
-    		outText.append(fromUser + "\n");
-    		outText.setCaretPosition(outText.getDocument().getLength());
-    		out.println(fromUser);
+    	public synchronized void sendData(String request) {
+    		out.println(request);
     	}
     	/**
     	 * Main client method, create a GUI JFrame here and use GUIPanel as the pane

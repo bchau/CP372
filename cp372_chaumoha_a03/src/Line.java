@@ -8,6 +8,10 @@ import java.util.ArrayList;
 
 public class Line implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int size;
 	ArrayList<DrawnPoint> points;
 	

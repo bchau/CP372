@@ -192,9 +192,13 @@ public class WhiteBoard {
 					Line line = new Line(temp,3);
 					String s = Line.serialize(line);
 					//Line newLine = Line.deserialize(s);
-					//TODO: need to send s to Server;
 					
-					System.out.println();
+					try{
+						client.sendData(s);
+					}
+					catch(Exception e){
+						outputArea.append("Could not send Data.\n");
+					}
 				}
             });
             drawPanel.add(imageLabel);

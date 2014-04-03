@@ -63,7 +63,7 @@ public class WhiteBoard {
 	private TrustManagerFactory tmf = null;
 	private SSLContext ctx = null;
 	private Client client = null;
-	private static String certPath = "WBPkeystore";
+	private static String certPath = "WBPClientKeystore";
 	private static char[] passphrase = "wbp123".toCharArray();
 	
 	//ImageBuffering
@@ -356,12 +356,13 @@ public class WhiteBoard {
 						sslsocketfactory = ctx.getSocketFactory();
 						socket = (SSLSocket) sslsocketfactory.createSocket(ipField.getText(), new Integer(portField.getText()));
 						if (socket != null)
-							client = new Client(socket, inputArea, outputArea);
+							client = new Client(socket, outputArea);
 						else
 							throw new Exception("Could not create connection, error with host");
 						connectToggle.setText("Disconnect");
 						connectToggle.setSelected(false);
 						outputArea.append("Connected.\n\n");
+						
 						//connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");
@@ -375,6 +376,7 @@ public class WhiteBoard {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
 						outputArea.append("Could not connect.\n\n");
+						e.printStackTrace();
 					} catch (Exception e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);

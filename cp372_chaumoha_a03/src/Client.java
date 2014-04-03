@@ -1,17 +1,21 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import javax.net.ssl.SSLSocket;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 class Client extends Thread{
     	private final static int STATE_RUN = 0, STATE_PAUSE = 2, STATE_STOP = 3;
     	private int _state;
     	private Socket socket = null;
-    	private PrintWriter out = null;
+    	//private PrintWriter out = null;
+    	private BufferedWriter out = null;
     	private BufferedReader in = null;
     	private JTextArea inText, outText;
     	private String fromServer = "", fromUser = "";
@@ -23,13 +27,19 @@ class Client extends Thread{
     	 * @param o - output jtextarea
     	 * @throws IOException - thrown if we can not create a buffered reader or print writer
     	 */
-    	public Client(SSLSocket s, JTextArea i, JTextArea o) throws IOException {
+    	public Client(SSLSocket s, JTextArea o) throws IOException {
     		super();
-    		socket = s;
-    		out = new PrintWriter(socket.getOutputStream(), true);
-    		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    		inText = i;
-    		outText = o;
+    		System.setProperty("https.protocols", "TLSv1");
+    		this.socket = s;
+    		//out = new PrintWriter(this.socket.getOutputStream(), true);
+    		OutputStream outputstream = socket.getOutputStream();
+            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(outputstream);
+            out = new BufferedWriter(outputstreamwriter);
+            out.write("HELLO");
+            out.flush();
+            
+            in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+       		outText = o;
     		_state = STATE_RUN;
     		this.start();
     		System.out.println("Client: Connected");
@@ -44,6 +54,7 @@ class Client extends Thread{
     			stateTemp = _state;
     		}
     		try {
+    			
     			while (stateTemp != STATE_STOP) {
     				switch (stateTemp) {
     				case STATE_RUN:
@@ -54,7 +65,9 @@ class Client extends Thread{
     					outText.append(fromServer + "\n");
     					outText.setCaretPosition(outText.getDocument().getLength());
     					if (fromServer.equals("Bye."))
-    						break;
+    						synchronized (this) {
+    							_state = STATE_STOP;
+    	    				}
     					break;
     				case STATE_PAUSE:
     					yield();
@@ -66,6 +79,7 @@ class Client extends Thread{
     			}
     			outText.append(fromServer + "\n");
     		} catch (IOException e) {
+    			e.printStackTrace();
     		}
 
     	}
@@ -98,8 +112,18 @@ class Client extends Thread{
     	/**
     	 * This takes text and sends it to the server
     	 */
-    	public synchronized void sendData(String request) {
-    		out.println(request);
+    	public synchronized void sendData(final String request) {
+    		SwingUtilities.invokeLater(new Runnable() {
+			    public void run() {
+			    	try {
+						out.write(request);
+						out.flush();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			    }
+    		});
     	}
     	
     	

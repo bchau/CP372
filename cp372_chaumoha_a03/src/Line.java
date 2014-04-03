@@ -7,44 +7,26 @@ import java.util.ArrayList;
 
 
 public class Line implements Serializable{
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-	int size;
 	ArrayList<DrawnPoint> points;
+	int strokeSize;
+	String colourRGB;
 	
-	public Line(ArrayList<DrawnPoint> points, int size){
-		this.size = size;
+	public Line(ArrayList<DrawnPoint> points, int s, String colourRGB){
 		this.points = points;
+		this.strokeSize = s;
+		this.colourRGB = colourRGB;
 	}
 	
-	public static String serialize(DrawnPoint point) {
-	    try {
-	        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-	        ObjectOutputStream so = new ObjectOutputStream(bo);
-	        so.writeObject(point);
-	        so.flush();
-	        // This encoding induces a bijection between byte[] and String (unlike UTF-8)
-	        return bo.toString("ISO-8859-1");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-		return null;
-	}
-	
-	public static DrawnPoint deserialize(String str) {
-	    // deserialize the object
-	    try {
-	        // This encoding induces a bijection between byte[] and String (unlike UTF-8)
-	        byte b[] = str.getBytes("ISO-8859-1"); 
-	        ByteArrayInputStream bi = new ByteArrayInputStream(b);
-	        ObjectInputStream si = new ObjectInputStream(bi);
-	        return (DrawnPoint)si.readObject();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-		return null;
+	public String toString(){
+		String result = "LINE;";
+		result+=strokeSize+";";
+		result+=colourRGB+";";
+		for (int i = 0; i < points.size();i++){
+			result+=points.get(i).toString()+";";
+		}
+		result+="ENDLINE";
+		return result;
 	}
 }

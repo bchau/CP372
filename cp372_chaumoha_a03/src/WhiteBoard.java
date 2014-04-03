@@ -73,8 +73,10 @@ public class WhiteBoard {
     private ArrayList<DrawnPoint> temp;
     private ArrayList<DrawnPoint> pointsSent;
     private boolean clickHeld = false;
+    private int penSize = 3;
     private Stroke stroke = new BasicStroke(
-            3,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
+            penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
+    
     
     /**
      * Creates and populates the graphic user interface.
@@ -139,7 +141,8 @@ public class WhiteBoard {
             	@Override
             	public void mouseDragged(MouseEvent arg0) {
             		if (SwingUtilities.isLeftMouseButton(arg0)&& clickHeld == true){
-            			points.add(new DrawnPoint(arg0.getPoint(),false));
+            			points.add(new DrawnPoint(arg0.getPoint()));
+            			pointsSent.add(new DrawnPoint(arg0.getPoint()));
 
             			if (points.size() > 1 ){
             				Point initialPoint = points.get(points.size()-1);
@@ -163,8 +166,9 @@ public class WhiteBoard {
             			pointsSent = new ArrayList<DrawnPoint>();
             			temp.addAll(points);
             			tempImageDetails = canvasImage.getData();
-            			points.add(new DrawnPoint(arg0.getPoint(),true));
-            			pointsSent.add(new DrawnPoint(arg0.getPoint(),true));
+            			points.add(new DrawnPoint(arg0.getPoint()));
+            			pointsSent.add(new DrawnPoint(arg0.getPoint()));
+
             			updateHelpText(arg0.getPoint());
             			draw(arg0.getPoint(),null);
             			synchronized(this){ clickHeld = true; }
@@ -196,23 +200,21 @@ public class WhiteBoard {
 
 				@Override
 				public void mouseReleased(MouseEvent arg0) {
-					synchronized(this){
-						clickHeld = false;
-					}
-					
-					String s = Line.serialize(pointsSent.get(0));
-					DrawnPoint newLine = Line.deserialize(s);
-					
-					
-						outputArea.append("x: "+newLine.x);
-						outputArea.append(" y: "+newLine.y+"\n");
-					
-					
-					try{
-						client.sendData(s);
-					}
-					catch(Exception e){
-						outputArea.append("Could not send Data.\n");
+					if(SwingUtilities.isLeftMouseButton(arg0)){
+						synchronized(this){
+							clickHeld = false;
+						}
+
+						String s = new Line(pointsSent,penSize,getColourHex(textColour.getRed(),textColour.getGreen(),textColour.getBlue())).toString();
+						outputArea.append(s);
+
+
+						try{
+							client.sendData(s);
+						}
+						catch(Exception e){
+							outputArea.append("Could not send Data.\n");
+						}
 					}
 				}
             });
@@ -230,9 +232,10 @@ public class WhiteBoard {
                 @Override
                 public void stateChanged(ChangeEvent arg0) {
                     Object o = strokeModel.getValue();
-                    Integer i = (Integer)o; 
+       
+                    penSize = (Integer)o; 
                     stroke = new BasicStroke(
-                            i.intValue(),
+                            penSize,
                             BasicStroke.CAP_ROUND,
                             BasicStroke.JOIN_ROUND,
                             1.7f);
@@ -381,6 +384,10 @@ public class WhiteBoard {
 			    }
 			});
 		}
+	}
+	
+	public String getColourHex(int r, int g, int b){
+		return String.format("#%02x%02x%02x", r, g, b);
 	}
     public static void main(String[] args) {
     	SwingUtilities.invokeLater(new Runnable() {

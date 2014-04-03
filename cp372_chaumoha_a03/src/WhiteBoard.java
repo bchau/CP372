@@ -13,11 +13,17 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -51,8 +57,14 @@ public class WhiteBoard {
 	private JLabel ipLabel, portLabel;
 	
 	//Connection
-	private Socket socket = null;
+	private SSLSocket socket = null;
+	private SSLSocketFactory sslsocketfactory = null;
+	private KeyStore keyStore = null;
+	private TrustManagerFactory tmf = null;
+	private SSLContext ctx = null;
 	private Client client = null;
+	private static String certPath = "WBPkeystore";
+	private static char[] passphrase = "wbp123".toCharArray();
 	
 	//ImageBuffering
     private BufferedImage canvasImage;
@@ -333,7 +345,16 @@ public class WhiteBoard {
 			SwingUtilities.invokeLater(new Runnable() {
 			    public void run() {
 			    	try { // try to determine the optimal connection, on error show a nice dialog
-						socket = new Socket(ipField.getText(), new Integer(portField.getText()));
+			    		keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+						keyStore.load(new FileInputStream(certPath), passphrase);
+
+						tmf = TrustManagerFactory
+								.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+						tmf.init(keyStore);
+						ctx = SSLContext.getInstance("SSL");
+						ctx.init(null, tmf.getTrustManagers(), null);
+						sslsocketfactory = ctx.getSocketFactory();
+						socket = (SSLSocket) sslsocketfactory.createSocket(ipField.getText(), new Integer(portField.getText()));
 						if (socket != null)
 							client = new Client(socket, inputArea, outputArea);
 						else

@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import javax.net.ssl.SSLSocket;
 import javax.swing.JTextArea;
 
 class Client extends Thread{
@@ -22,7 +23,7 @@ class Client extends Thread{
     	 * @param o - output jtextarea
     	 * @throws IOException - thrown if we can not create a buffered reader or print writer
     	 */
-    	public Client(Socket s, JTextArea i, JTextArea o) throws IOException {
+    	public Client(SSLSocket s, JTextArea i, JTextArea o) throws IOException {
     		super();
     		socket = s;
     		out = new PrintWriter(socket.getOutputStream(), true);

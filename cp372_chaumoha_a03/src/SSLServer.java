@@ -22,6 +22,7 @@ import javax.net.ssl.TrustManagerFactory;
 public class SSLServer {
 	private static int defaultPort = 4444;
 	private static String certPath = "WBPkeystore";
+	private static char[] passphrase = "wbp123".toCharArray();
 
 	public static void main(String[] args) {
 		if (args.length != 1) {
@@ -30,7 +31,7 @@ public class SSLServer {
 			System.err.println("prog <PORT>");
 			System.exit(1); // exit out
 		}
-		char[] passphrase = "wbp123".toCharArray();
+		
 		KeyStore keyStore = null;
 		TrustManagerFactory tmf = null;
 		SSLContext ctx = null;

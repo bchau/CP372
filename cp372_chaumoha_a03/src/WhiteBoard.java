@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -25,11 +26,15 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 public class WhiteBoard {
@@ -68,6 +73,8 @@ public class WhiteBoard {
     private ArrayList<DrawnPoint> temp;
     private ArrayList<DrawnPoint> pointsSent;
     private boolean clickHeld = false;
+    private Stroke stroke = new BasicStroke(
+            3,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
     
     /**
      * Creates and populates the graphic user interface.
@@ -197,8 +204,8 @@ public class WhiteBoard {
 					DrawnPoint newLine = Line.deserialize(s);
 					
 					
-						outputArea.append("\nx: "+newLine.x);
-						outputArea.append(" y: "+newLine.y);
+						outputArea.append("x: "+newLine.x);
+						outputArea.append(" y: "+newLine.y+"\n");
 					
 					
 					try{
@@ -212,13 +219,28 @@ public class WhiteBoard {
             drawPanel.add(imageLabel);
     		clear(canvasImage,Color.white);
     		
-
             JScrollPane imageScroll = new JScrollPane(drawPanel);
             drawPanel.add(imageLabel);
             gui.add(imageScroll,BorderLayout.CENTER);
     		
-    		
-    		
+            final SpinnerNumberModel strokeModel = 
+                    new SpinnerNumberModel(3,1,16,1);
+            JSpinner strokeSize = new JSpinner(strokeModel);
+            ChangeListener strokeListener = new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent arg0) {
+                    Object o = strokeModel.getValue();
+                    Integer i = (Integer)o; 
+                    stroke = new BasicStroke(
+                            i.intValue(),
+                            BasicStroke.CAP_ROUND,
+                            BasicStroke.JOIN_ROUND,
+                            1.7f);
+                }
+            };
+            strokeSize.addChangeListener(strokeListener);
+            connectionPane.add(strokeSize);
+            
             JButton colourButton = new JButton("Colour");
             colourButton.setToolTipText("Choose a Color");
             ActionListener textColourListener = new ActionListener() {
@@ -283,8 +305,7 @@ public class WhiteBoard {
     	Graphics2D g = this.canvasImage.createGraphics();
         //g.setRenderingHints(renderingHints);
         g.setColor(textColour);
-        g.setStroke(new BasicStroke(
-                3,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f));
+        g.setStroke(stroke);
         if (finalPoint != null)
         	g.drawLine(initialPoint.x, initialPoint.y, finalPoint.x, finalPoint.y);
         else

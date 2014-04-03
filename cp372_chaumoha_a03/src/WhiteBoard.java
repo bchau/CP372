@@ -66,6 +66,7 @@ public class WhiteBoard {
     private JLabel output = new JLabel("White Board");
     private ArrayList<DrawnPoint> points = new ArrayList<DrawnPoint>();
     private ArrayList<DrawnPoint> temp;
+    private ArrayList<DrawnPoint> pointsSent;
     private boolean clickHeld = false;
     
     /**
@@ -152,9 +153,11 @@ public class WhiteBoard {
                 public void mousePressed(MouseEvent arg0) {
             		if (SwingUtilities.isLeftMouseButton(arg0)){
             			temp = new ArrayList<DrawnPoint>();
+            			pointsSent = new ArrayList<DrawnPoint>();
             			temp.addAll(points);
             			tempImageDetails = canvasImage.getData();
             			points.add(new DrawnPoint(arg0.getPoint(),true));
+            			pointsSent.add(new DrawnPoint(arg0.getPoint(),true));
             			updateHelpText(arg0.getPoint());
             			draw(arg0.getPoint(),null);
             			synchronized(this){ clickHeld = true; }
@@ -189,9 +192,14 @@ public class WhiteBoard {
 					synchronized(this){
 						clickHeld = false;
 					}
-					Line line = new Line(temp,3);
-					String s = Line.serialize(line);
-					//Line newLine = Line.deserialize(s);
+					
+					String s = Line.serialize(pointsSent.get(0));
+					DrawnPoint newLine = Line.deserialize(s);
+					
+					
+						outputArea.append("\nx: "+newLine.x);
+						outputArea.append(" y: "+newLine.y);
+					
 					
 					try{
 						client.sendData(s);

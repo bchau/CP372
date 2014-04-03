@@ -20,11 +20,11 @@ public class Line implements Serializable{
 		this.points = points;
 	}
 	
-	public static String serialize(Line line) {
+	public static String serialize(DrawnPoint point) {
 	    try {
 	        ByteArrayOutputStream bo = new ByteArrayOutputStream();
 	        ObjectOutputStream so = new ObjectOutputStream(bo);
-	        so.writeObject(line);
+	        so.writeObject(point);
 	        so.flush();
 	        // This encoding induces a bijection between byte[] and String (unlike UTF-8)
 	        return bo.toString("ISO-8859-1");
@@ -34,14 +34,14 @@ public class Line implements Serializable{
 		return null;
 	}
 	
-	public static Line deserialize(String str) {
+	public static DrawnPoint deserialize(String str) {
 	    // deserialize the object
 	    try {
 	        // This encoding induces a bijection between byte[] and String (unlike UTF-8)
 	        byte b[] = str.getBytes("ISO-8859-1"); 
 	        ByteArrayInputStream bi = new ByteArrayInputStream(b);
 	        ObjectInputStream si = new ObjectInputStream(bi);
-	        return (Line)si.readObject();
+	        return (DrawnPoint)si.readObject();
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }

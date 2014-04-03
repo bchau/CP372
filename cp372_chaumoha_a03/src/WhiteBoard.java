@@ -12,10 +12,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -26,7 +23,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -44,11 +40,10 @@ public class WhiteBoard {
 	//Fields
 	private JTextField ipField, portField;
 	private JTextArea inputArea, outputArea;
-	private JButton sendButton;
 	private JToggleButton connectToggle;
 	
 	//Input Fields
-	private JLabel ipLabel, portLabel, inputLabel, resultLabel;
+	private JLabel ipLabel, portLabel;
 	
 	//Connection
 	private Socket socket = null;
@@ -61,8 +56,6 @@ public class WhiteBoard {
     private JPanel gui;
     
     //Window Preferences
-    private int windowWidth = 1024;
-    private int windowHeight = 640;
     private int drawAreaWidth = 640;
     private int drawAreaHeight = 640;
     
@@ -71,8 +64,8 @@ public class WhiteBoard {
     private BufferedImage colourSample = new BufferedImage(
             16,16,BufferedImage.TYPE_INT_RGB);
     private JLabel output = new JLabel("White Board");
-    private ArrayList<Point> points = new ArrayList<Point>();
-    private ArrayList<Point> temp;
+    private ArrayList<DrawnPoint> points = new ArrayList<DrawnPoint>();
+    private ArrayList<DrawnPoint> temp;
     private boolean clickHeld = false;
     
     /**
@@ -86,8 +79,6 @@ public class WhiteBoard {
     		//labels
     		ipLabel = new JLabel("IP:");
     		portLabel = new JLabel("Port:");
-    		inputLabel = new JLabel("Server Request:");
-    		resultLabel = new JLabel("Server Result:");
 
     		//fields
     		ipField = new JTextField("127.0.0.1", 15);
@@ -140,7 +131,7 @@ public class WhiteBoard {
             	@Override
             	public void mouseDragged(MouseEvent arg0) {
             		if (SwingUtilities.isLeftMouseButton(arg0)&& clickHeld == true){
-            			points.add(arg0.getPoint());
+            			points.add(new DrawnPoint(arg0.getPoint(),false));
 
             			if (points.size() > 1 ){
             				Point initialPoint = points.get(points.size()-1);
@@ -160,10 +151,10 @@ public class WhiteBoard {
             	@Override
                 public void mousePressed(MouseEvent arg0) {
             		if (SwingUtilities.isLeftMouseButton(arg0)){
-            			temp = new ArrayList<Point>();
+            			temp = new ArrayList<DrawnPoint>();
             			temp.addAll(points);
             			tempImageDetails = canvasImage.getData();
-            			points.add(arg0.getPoint());
+            			points.add(new DrawnPoint(arg0.getPoint(),true));
             			updateHelpText(arg0.getPoint());
             			draw(arg0.getPoint(),null);
             			synchronized(this){ clickHeld = true; }
@@ -198,6 +189,12 @@ public class WhiteBoard {
 					synchronized(this){
 						clickHeld = false;
 					}
+					Line line = new Line(temp,3);
+					String s = Line.serialize(line);
+					//Line newLine = Line.deserialize(s);
+					//TODO: need to send s to Server;
+					
+					System.out.println();
 				}
             });
             drawPanel.add(imageLabel);
@@ -315,7 +312,7 @@ public class WhiteBoard {
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append("Could not find host.\n");
+						outputArea.append("Could not find host.\n\n");
 					} catch (NumberFormatException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
@@ -323,11 +320,11 @@ public class WhiteBoard {
 					} catch (IOException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append("Could not connect.\n");
+						outputArea.append("Could not connect.\n\n");
 					} catch (Exception e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append(e.getMessage()+"\n");
+						outputArea.append(e.getMessage()+"\n\n");
 					}
 			    }
 			});

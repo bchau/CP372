@@ -44,7 +44,7 @@ public class SSLServer {
 					.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			tmf.init(keyStore);
 			ctx = SSLContext.getInstance("SSL");
-			ctx.init(null, tmf.getTrustManagers(), null);
+			ctx.init(null, tmf.getTrustManagers(), new java.security.SecureRandom());
 			sslserversocketfactory = ctx.getServerSocketFactory();
 		} catch (IOException e) {
 		} catch (KeyStoreException e) {
@@ -97,8 +97,11 @@ public class SSLServer {
 		WhiteBoardProtocol p = new WhiteBoardProtocol();
 		while (true) {
 			try {
-				connections.add(new ClientConnection(
-						(SSLSocket) sslserversocket.accept(), p));
+				ClientConnection c = new ClientConnection(
+						(SSLSocket) sslserversocket.accept(), p);
+				connections.add(c);
+				c.start();
+				System.out.println("Accepted new WB Client");
 			} catch (IOException e) {
 				System.err.println("An error has occured. Exiting.");
 				try {
@@ -129,25 +132,29 @@ public class SSLServer {
 			} catch (IOException e) {
 				System.err.println("Error creating connection to client.");
 			}
+			System.out.println("Client IP: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 		}
 
 		public void run() {
-			int code = -1;
+			int code = 0;
 			boolean validated = false;
 			try {
-				while ((inputLine = in.readLine()) != null || code != -1) {
+				while (true) {
 					try {
+						inputLine = in.readLine();
+						System.out.println(inputLine);
+						out.println("Got Stuff :D");
+						if (false) break;
+					} catch (Exception e) { // on error end run
+						//System.err.println("Client was disconnected.");
 						
-
-					} catch (NullPointerException e) { // on error end run
-						System.err.println("Client was disconnected.");
-						clientSocket.close();
-						break;
 					}
 				}
+				clientSocket.close();
 			} catch (IOException e) {
 				System.err.println("Client was disconnected.");
 			}
+			System.out.println("Client was disconnected.");
 		}
 	}
 }

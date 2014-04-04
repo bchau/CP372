@@ -1,6 +1,5 @@
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class WhiteBoardProtocol {
 
@@ -150,7 +149,9 @@ public class WhiteBoardProtocol {
 	}
 
 	public Color newClientColour() {
-		Random rand = new Random();
-		return new Color(rand.nextInt(), rand.nextInt(), rand.nextInt());
+		int r = (int)(Math.random()*256);
+		int g = (int)(Math.random()*256);
+		int b = (int)(Math.random()*256);
+		return new Color(r,g,b);
 	}
 }

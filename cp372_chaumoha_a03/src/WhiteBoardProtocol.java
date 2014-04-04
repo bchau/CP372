@@ -1,6 +1,6 @@
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class WhiteBoardProtocol {
 
@@ -45,7 +45,7 @@ public class WhiteBoardProtocol {
 		switch (command) {
 		case PASSWORD:
 			if (password.equals(getPassword(input))) {
-				c.send(newClientColour());
+				c.setColour(newClientColour());
 				sendImage(c);
 				break;
 			}
@@ -132,7 +132,9 @@ public class WhiteBoardProtocol {
 		return "";
 	}
 
-	public String newClientColour() {
-		return "";
+	public Color newClientColour() {
+		Random rand = new Random();
+		float h = rand.nextFloat(), s = (float)0.5, b = (float)0.5;
+		return Color.getHSBColor(h,s,b);
 	}
 }

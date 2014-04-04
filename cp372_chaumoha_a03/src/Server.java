@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -69,6 +70,7 @@ public class Server {
 		private String inputLine, outputLine;
 		private WhiteBoardProtocol protocol;
 		private BufferedReader in;
+		private Color colour = null;
 
 		public ClientConnection(Socket s, WhiteBoardProtocol p) {
 			this.clientSocket = s;
@@ -92,13 +94,16 @@ public class Server {
 					try {
 						if (valid == false) {
 							if (inputLine.startsWith("PASSWORD")
-								&& inputLine.endsWith("ENDPASSWORD")) {
-									code = WhiteBoardProtocol.PASSWORD;
+									&& inputLine.endsWith("ENDPASSWORD")) {
+								code = WhiteBoardProtocol.PASSWORD;
 							} else {
 								code = WhiteBoardProtocol.NEEDPASSWORD;
 								continue;
 							}
-						} else if (inputLine.startsWith("LINE")
+						} else if (inputLine.startsWith("PASSWORD")
+								&& inputLine.endsWith("ENDPASSWORD")) {
+							code = WhiteBoardProtocol.PASSWORD;
+						}else if (inputLine.startsWith("LINE")
 								&& inputLine.endsWith("ENDLINE")) {
 							code = WhiteBoardProtocol.LINE;
 						} else if (inputLine.startsWith("CLEAR")
@@ -110,8 +115,10 @@ public class Server {
 						} else {
 							code = WhiteBoardProtocol.FAULT;
 						}
-						boolean res = this.protocol.processInput(code, inputLine, this);
-						if(valid == false) valid = res;
+						boolean res = this.protocol.processInput(code,
+								inputLine, this);
+						if (valid == false)
+							valid = res;
 					} catch (NullPointerException e) { // on error end run
 						System.err.println("Client was disconnected.");
 						clientSocket.close();
@@ -129,6 +136,11 @@ public class Server {
 
 		public void send(String message) {
 			out.println(message);
+		}
+
+		public void setColour(Color c) {
+				this.colour = c;
+				this.send("OK;" + Line.getColourHex(this.colour) + ";ENDOK");
 		}
 	}
 }

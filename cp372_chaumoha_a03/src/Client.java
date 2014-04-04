@@ -73,7 +73,7 @@ class Client extends Thread{
     					else if(fromServer.startsWith("PASSWORDREQUEST")) {
     						if (this.password.split(";").length != 3 || retry ) {
     							JPasswordField pf = new JPasswordField();
-    							int okCxl = JOptionPane.showConfirmDialog(outText, pf, "White Board Password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    							int okCxl = JOptionPane.showConfirmDialog(null, pf, "White Board Password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
     							if (okCxl == JOptionPane.OK_OPTION) {
     							  this.password = new String(pf.getPassword()).trim().replace(';', '\\');
     							  this.password = "PASSWORD;" + this.password + ";ENDPASSWORD";
@@ -101,22 +101,7 @@ class Client extends Thread{
     			wb.systemAppendOutputArea(fromServer+"\n");
     		} catch (IOException e) {
     			wb.systemAppendOutputArea("Server disconnected.\n");
-    			wb.connectToggle.setText("Disconnecting");
-    			SwingUtilities.invokeLater(new Runnable() {
-    				public void run() {
-    					try {
-    						tStop();
-    						socket.close();
-    						socket = null;
-    						wb.connectToggle.setText("Connect");
-    						wb.connectToggle.setSelected(false);
-    						wb.systemAppendOutputArea("Disconnected.\n");
-    					} catch (Exception e) {
-    						wb.connectToggle.setText("Disconnect");
-    						wb.connectToggle.setSelected(true);
-    					}
-    				}
-    			});
+    			wb.clientDisconnected();
     		}
     		
     	}

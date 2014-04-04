@@ -415,6 +415,7 @@ public class WhiteBoard {
     		
     		outputArea = new JTextPane();
     		outputArea.setEditorKit(new WrapEditorKit());
+    		outputArea.setPreferredSize(new Dimension(10,50));
     		outputArea.setEditable(false);
     		outputArea.setBackground(Color.LIGHT_GRAY);
     		messageBox.add(new JScrollPane(outputArea),BorderLayout.CENTER);
@@ -667,8 +668,15 @@ public class WhiteBoard {
 		String[] temp2 = temp[0].split(",");
 		String name = temp2[1];
 		Color c = Line.getColourFromHex(temp2[2]);
-		appendOutputArea(name+" :"+temp[1],c);
+		appendOutputArea(name+" :"+temp[1]+"\n",c);
 		System.out.println(string);
+	}
+	
+	public void clientDisconnected(){
+		client = null;
+		socket = null;
+		connectToggle.setText("Connect");
+		connectToggle.setSelected(false);
 	}
 	
 	/**

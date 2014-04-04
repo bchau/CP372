@@ -12,7 +12,7 @@ public class WhiteBoardProtocol {
 	public static final String[] keywords = {"SUBMIT"};
 	
 	//lines
-	private ArrayList<Line> lines = new ArrayList<Line>();
+	private ArrayList<Server.ClientConnection> clients = new ArrayList<Server.ClientConnection>();
 	
 	//responses
 	public static final String LINE_SUCCESS = "Line submitted successfully.\n";
@@ -28,7 +28,7 @@ public class WhiteBoardProtocol {
 		String result = "";
 		switch(command){
 			case LINE:
-				parseLine(input);
+				//parseLine(input);
 				break;
 			case FAULT:
 				result = PARSE_FAIL;
@@ -39,17 +39,21 @@ public class WhiteBoardProtocol {
 		return result;
 	}
 	
-	public String parseLine(String input){
-		try{
-			Line line = Line.parseLine(input);
-			lines.add(line);
-			return LINE_SUCCESS;
-		}
-		catch(Exception e){
-			return PARSE_FAIL;
-		}
+	public void addClient(Server.ClientConnection c) {
+		clients.add(c);
 	}
 	
+	public synchronized void notifyClients(String message, Server.ClientConnection sender) {
+		for (Server.ClientConnection c : clients) {
+			try {
+				if (!sender.equals(c)) {
+					c.send(message);
+				}
+			} catch(Exception e) {
+				continue;
+			}
+		}
+	}
 }
 	
 	

@@ -438,7 +438,7 @@ public class WhiteBoard {
 				public void keyReleased(KeyEvent arg0) {
 					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !inputArea.getText().trim().equals("")){
 						
-						appendOutputArea(name+": " + inputArea.getText() + "\n");
+						appendOutputArea("You: " + inputArea.getText() + "\n");
 						if (client != null) {
 							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");
@@ -461,7 +461,7 @@ public class WhiteBoard {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					if (!inputArea.getText().trim().equals("")) {
-						appendOutputArea("You: " + inputArea.getText() + "\n");
+						appendOutputArea("You : " + inputArea.getText() + "\n");
 						if (client != null) {
 							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");
@@ -562,6 +562,7 @@ public class WhiteBoard {
 						systemAppendOutputArea("Connected.\n");;
 						isConnected = true;
 						client.sendPassword();
+						name = "User@"+socket.getLocalAddress();
 						// connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");
@@ -667,6 +668,7 @@ public class WhiteBoard {
 		String name = temp2[1];
 		Color c = Line.getColourFromHex(temp2[2]);
 		appendOutputArea(name+" :"+temp[1],c);
+		System.out.println(string);
 	}
 	
 	/**

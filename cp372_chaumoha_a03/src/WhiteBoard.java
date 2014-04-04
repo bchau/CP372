@@ -74,7 +74,7 @@ public class WhiteBoard {
 	private Socket socket = null;
 	private SocketFactory socketfactory = null;
 	private Client client = null;
-	private boolean isConnected = true;
+	protected boolean isConnected = false;
 
 	
 	//ImageBuffering
@@ -546,6 +546,7 @@ public class WhiteBoard {
 			});
 			
 		} else {
+			isConnected = false;
 			systemAppendOutputArea("Disconnecting...\n");
 			connectToggle.setText("Disconnecting");
 			SwingUtilities.invokeLater(new Runnable() {
@@ -620,6 +621,14 @@ public class WhiteBoard {
 		textColour = Line.getColourFromHex(temp[1]);
 		clear(colourSample,textColour);
 		colourButton.updateUI();
+	}
+	
+	protected void printMessage(String string){
+		String[] temp = string.split(";");
+		String[] temp2 = temp[0].split(",");
+		String name = temp2[1];
+		Color c = Line.getColourFromHex(temp2[2]);
+		appendOutputArea(name+" :"+temp[1],c);
 	}
 	
 	/**

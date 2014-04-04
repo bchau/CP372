@@ -87,7 +87,6 @@ public class WhiteBoard {
     
     //WhiteBoard Preferences
     private Color textColour = Color.BLACK;
-    private final boolean ENABLED_TEXT_COLOUR_SELECTION = true;
     private BufferedImage colourSample = new BufferedImage(
             16,16,BufferedImage.TYPE_INT_RGB);
     private JLabel output = new JLabel("White Board");
@@ -273,7 +272,8 @@ public class WhiteBoard {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					
+					if (client != null)
+						client.sendData(client.SEND_PASSWORD);
 				}
 				
 			});

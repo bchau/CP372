@@ -678,6 +678,7 @@ public class WhiteBoard {
 		socket = null;
 		connectToggle.setText("Connect");
 		connectToggle.setSelected(false);
+		isConnected = false;
 	}
 	
 	/**

@@ -118,6 +118,40 @@ public class WhiteBoard {
 
     		//fields
     		ipField = new JTextField("127.0.0.1", 15);
+    		ipField.addMouseListener(new MouseListener(){
+
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					if (ipField.getText().trim().equals("127.0.0.1")){
+						ipField.setText("");
+					}
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mousePressed(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+    			
+    		});
     		portField = new JTextField("4444", 4);
     		
     		connectToggle = new JToggleButton("Connect");

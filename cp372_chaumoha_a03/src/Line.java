@@ -30,16 +30,11 @@ public class Line implements Serializable{
 		return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
 	}
 	
-	public static Color getColourFromHex(String s){
-		String a = s.substring(1,3);
-		String d = s.substring(3,5);
-		String c = s.substring(5,7);
-		
-		int r = new Integer(s.substring(1,3));
-		int g = new Integer(s.substring(3,4));
-		int b = new Integer(s.substring(5,6));
-		
-		return new Color(r,g,b);
+	public static Color getColourFromHex(String colorStr){
+		return new Color(
+	            Integer.valueOf( colorStr.substring( 1, 3 ), 16 ),
+	            Integer.valueOf( colorStr.substring( 3, 5 ), 16 ),
+	            Integer.valueOf( colorStr.substring( 5, 7 ), 16 ) );
 	}
 	public static Line parseLine(String s){
 		String[] tokens = s.split(";");

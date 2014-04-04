@@ -309,7 +309,7 @@ public class WhiteBoard {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					if (client != null)
-						client.sendData(client.SEND_PASSWORD);
+						client.sendPassword();
 				}
 				
 			});
@@ -557,7 +557,7 @@ public class WhiteBoard {
 						connectToggle.setSelected(false);
 						systemAppendOutputArea("Connected.\n");;
 						isConnected = true;
-						client.sendData(client.SEND_PASSWORD);
+						client.sendPassword();
 						// connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");

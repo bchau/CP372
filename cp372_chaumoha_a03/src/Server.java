@@ -44,7 +44,9 @@ public class Server {
 		while (true) {
 			try {
 				try { // accept new connections every time and handle them synchronously.
-					new ClientConnection(serverSocket.accept(),p).start();
+					ClientConnection c = new ClientConnection(serverSocket.accept(),p);
+					c.start();
+					p.addClient(c);
 					System.out.println("Accepted new Client");
 				} catch (IOException e) {
 					System.err.println("Accept failed, trying again.");
@@ -57,8 +59,7 @@ public class Server {
 		}
 		System.exit(0);
 	}
-
-	private static class ClientConnection extends Thread{
+	public static class ClientConnection extends Thread{
 		private Socket clientSocket;
 		private PrintWriter out;
 		private String inputLine, outputLine;
@@ -90,7 +91,8 @@ public class Server {
 							l = Line.parseLine(inputLine);
 							l.strokeSize = 10;
 							System.err.println(l.toString());
-							out.println(l.toString());
+							//out.println(l.toString());
+							this.protocol.notifyClients(l.toString(), this);
 						}
 
 					} catch (NullPointerException e) { // on error end run
@@ -102,6 +104,13 @@ public class Server {
 			} catch (IOException e) {
 				System.err.println("Client was disconnected.");
 			}
+		}
+		
+		public boolean equals(ClientConnection o) {
+			return this.clientSocket.equals(o.clientSocket);
+		}
+		public void send(String message) {
+			out.println(message);
 		}
 	}
 }

@@ -94,7 +94,7 @@ public class SSLServer {
 			System.err.println("Error creating socket, exiting...");
 			System.exit(1);
 		}
-		WhiteBoardProtocol p = new WhiteBoardProtocol();
+		WhiteBoardProtocol p = new WhiteBoardProtocol("");
 		while (true) {
 			try {
 				ClientConnection c = new ClientConnection(

@@ -26,7 +26,8 @@ public class Server {
 		}
 		try {
 			serverSocket = new ServerSocket(portnum);
-			System.out.println("Running on port " + serverSocket.getLocalPort());
+			System.out
+					.println("Running on port " + serverSocket.getLocalPort());
 		} catch (IOException e) {
 			System.err.println("Could not listen on port " + portnum + ".");
 			try { // try again on error
@@ -39,12 +40,14 @@ public class Server {
 				System.exit(1);
 			}
 		}
-		
-		WhiteBoardProtocol p = new WhiteBoardProtocol();
+
+		WhiteBoardProtocol p = new WhiteBoardProtocol("PASSWORD");
 		while (true) {
 			try {
-				try { // accept new connections every time and handle them synchronously.
-					ClientConnection c = new ClientConnection(serverSocket.accept(),p);
+				try { // accept new connections every time and handle them
+						// synchronously.
+					ClientConnection c = new ClientConnection(
+							serverSocket.accept(), p);
 					c.start();
 					p.addClient(c);
 					System.out.println("Accepted new Client");
@@ -59,7 +62,8 @@ public class Server {
 		}
 		System.exit(0);
 	}
-	public static class ClientConnection extends Thread{
+
+	public static class ClientConnection extends Thread {
 		private Socket clientSocket;
 		private PrintWriter out;
 		private String inputLine, outputLine;
@@ -76,25 +80,32 @@ public class Server {
 			} catch (IOException e) {
 				System.err.println("Error creating connection to client.");
 			}
-			System.out.println("Client IP: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+			System.out.println("Client IP: " + clientSocket.getInetAddress()
+					+ ":" + clientSocket.getPort());
 		}
 
 		public void run() {
 			int code = -1;
+			boolean valid = false;
 			try {
 				while ((inputLine = in.readLine()) != null || code != -1) {
 					try {
-						System.out.println(inputLine);
-						outputLine = protocol.processInput(code, inputLine);
-						Line l = null;
-						if (inputLine.startsWith("LINE") && inputLine.endsWith("ENDLINE")) {
-							l = Line.parseLine(inputLine);
-							//l.strokeSize = 10;
-							System.err.println(l.toString());
-							//out.println(l.toString());
-							this.protocol.notifyClients(l.toString(), this);
+						if (inputLine.startsWith("PASSWORD")
+								&& inputLine.endsWith("ENDPASSWORD")) {
+							code = WhiteBoardProtocol.PASSWORD;
+						} else if (inputLine.startsWith("LINE")
+								&& inputLine.endsWith("ENDLINE")) {
+							code = WhiteBoardProtocol.LINE;
+						} else if (inputLine.startsWith("CLEAR")
+								&& inputLine.endsWith("ENDCLEAR")) {
+							code = WhiteBoardProtocol.CLEAR;
+						} else if (inputLine.startsWith("MESSAGE")
+								&& inputLine.endsWith("ENDMESSAGE")) {
+							code = WhiteBoardProtocol.MESSAGE;
+						} else {
+							code = WhiteBoardProtocol.FAULT;
 						}
-
+						this.protocol.processInput(code, inputLine, this);
 					} catch (NullPointerException e) { // on error end run
 						System.err.println("Client was disconnected.");
 						clientSocket.close();
@@ -105,10 +116,11 @@ public class Server {
 				System.err.println("Client was disconnected.");
 			}
 		}
-		
+
 		public boolean equals(ClientConnection o) {
 			return this.clientSocket.equals(o.clientSocket);
 		}
+
 		public void send(String message) {
 			out.println(message);
 		}

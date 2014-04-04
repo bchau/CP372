@@ -31,12 +31,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 
 public class WhiteBoard {
@@ -46,7 +51,7 @@ public class WhiteBoard {
 	 */
 	//Fields
 	private JTextField inputArea,ipField, portField;
-	private JEditorPane outputArea;
+	private JTextPane outputArea;
 	private JToggleButton connectToggle;
 	
 	//Input Fields
@@ -82,11 +87,15 @@ public class WhiteBoard {
     private int penSize = 3;
     private Stroke stroke = new BasicStroke(penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
     
+    //ChatBox Preferences
+    private StyledDocument doc;
+    private Style style;
+    
     /**
      * Creates and populates the graphic user interface.
      * @return a JComponent containing the gui
      */
-    public JComponent getGui() {
+    public JComponent getGui(){
     	if (gui == null){
     		gui = new JPanel(new BorderLayout());
     		
@@ -282,11 +291,15 @@ public class WhiteBoard {
     		
     		//Text area and input
     		JPanel messageBox = new JPanel(new BorderLayout());
-    		outputArea = new JEditorPane();
+    		outputArea = new JTextPane();
     		//outputArea.setLineWrap(true);
     		outputArea.setEditable(false);
     		outputArea.setBackground(Color.LIGHT_GRAY);
     		messageBox.add(new JScrollPane(outputArea),BorderLayout.CENTER);
+    		doc = outputArea.getStyledDocument();
+
+            style = outputArea.addStyle("I'm a Style", null);
+            
     		
     		JPanel inputBox = new JPanel(new FlowLayout());
     		inputArea = new JTextField("",15);
@@ -311,6 +324,7 @@ public class WhiteBoard {
     		inputBox.add(sendButton);
     		messageBox.add(inputBox,BorderLayout.SOUTH);
     		gui.add(messageBox,BorderLayout.EAST);
+            
     	}
     	
     	return gui;
@@ -465,7 +479,17 @@ public class WhiteBoard {
 		});
 	}
 
-	private void appendOutputArea(String string) {
-		outputArea.setText(outputArea.getText()+string);
+	private void appendOutputArea(String string, Color c) {
+        StyleConstants.setForeground(style, c);
+        try {
+			doc.insertString(doc.getLength(), string, style);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	private void appendOutputArea(String string){
+		appendOutputArea(string, Color.blue);
 	}
 }

@@ -7,7 +7,6 @@ import java.net.Socket;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 class Client extends Thread {
@@ -18,8 +17,7 @@ class Client extends Thread {
 	private BufferedReader in = null;
 	private WhiteBoard wb = null;
 	private JEditorPane outText;
-	private JTextField inText;
-	private String fromServer = "", fromUser = "";
+	private String fromServer = "";
 	private String password = "PASSWORD;ENDPASSWORD";
 	private boolean retry = true;
 
@@ -113,7 +111,7 @@ class Client extends Thread {
 				}
 			}
 		} catch (IOException e) {
-			wb.systemAppendOutputArea("Server disconnected.\n");
+			//wb.systemAppendOutputArea("Disconnected.\n");
 			wb.clientDisconnected();
 		}
 

@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
-import javax.net.SocketFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -72,7 +70,6 @@ public class WhiteBoard {
 
 	// Connection
 	private Socket socket = null;
-	private SocketFactory socketfactory = null;
 	private Client client = null;
 	protected boolean isConnected = false;
 
@@ -301,6 +298,7 @@ public class WhiteBoard {
 				}
 			};
 			strokeSize.addChangeListener(strokeListener);
+			connectionPane.add(new JLabel("Size:"));
 			connectionPane.add(strokeSize);
 
 			colourButton = new JButton("Colour");
@@ -402,7 +400,7 @@ public class WhiteBoard {
 
 				@Override
 				public void focusLost(FocusEvent arg0) {
-					nameArea.setText(nameArea.getText().replace(';', '\\'));
+					nameArea.setText(nameArea.getText().replace(';', '\\').replace(',', '\\'));
 					if (!nameArea.getText().trim().equals("") && client != null){
 						name = nameArea.getText();
 						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
@@ -418,7 +416,7 @@ public class WhiteBoard {
     		outputArea.setEditorKit(new WrapEditorKit());
     		outputArea.setPreferredSize(new Dimension(10,50));
     		outputArea.setEditable(false);
-    		outputArea.setBackground(Color.LIGHT_GRAY);
+    		outputArea.setBackground(Color.WHITE);
     		messageBox.add(new JScrollPane(outputArea),BorderLayout.CENTER);
     		doc = outputArea.getStyledDocument();
 
@@ -440,7 +438,7 @@ public class WhiteBoard {
 				public void keyReleased(KeyEvent arg0) {
 					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !inputArea.getText().trim().equals("")){
 						
-						appendOutputArea("You: " + inputArea.getText() + "\n");
+						appendOutputArea("You:\n   " + inputArea.getText() + "\n");
 						if (client != null) {
 							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");
@@ -463,7 +461,7 @@ public class WhiteBoard {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					if (!inputArea.getText().trim().equals("")) {
-						appendOutputArea("You : " + inputArea.getText() + "\n");
+						appendOutputArea("You: \n   " + inputArea.getText() + "\n");
 						if (client != null) {
 							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");
@@ -477,7 +475,7 @@ public class WhiteBoard {
     		inputBox.add(sendButton);
     		messageBox.add(inputBox,BorderLayout.SOUTH);
     		gui.add(messageBox,BorderLayout.EAST);
-            
+    		StyleConstants.setFontSize(style, 15);
     	}
     	
     	return gui;
@@ -640,7 +638,12 @@ public class WhiteBoard {
 		});
 	}
 
-	private void appendOutputArea(String string, Color c) {
+	private void appendOutputArea(String string, Color c, boolean isServer) {
+        if (isServer)
+        	StyleConstants.setBold(style, true);
+        else
+        	StyleConstants.setBold(style, false);
+        
         StyleConstants.setForeground(style, c);
         try {
 			doc.insertString(doc.getLength(), string, style);
@@ -650,11 +653,11 @@ public class WhiteBoard {
 	}
 	
 	protected void appendOutputArea(String string){
-		appendOutputArea(string, textColour);
+		appendOutputArea(string, textColour, false);
 	}
 	
 	protected void systemAppendOutputArea(String string){
-		appendOutputArea(string, Color.BLACK);
+		appendOutputArea(string, Color.BLACK, true);
 	}
 	
 	protected void setTextColour(String string){
@@ -669,7 +672,8 @@ public class WhiteBoard {
 		String[] temp2 = temp[0].split(",");
 		String name = temp2[1];
 		Color c = Line.getColourFromHex(temp2[2]);
-		appendOutputArea(name+" :"+temp[1]+"\n",c);
+		boolean isServer = temp2[3].equals("1");
+		appendOutputArea(name+" :\n   "+temp[1]+"\n",c,isServer);
 	}
 	
 	public void clientDisconnected(){
@@ -685,7 +689,8 @@ public class WhiteBoard {
 	 * @author https://community.oracle.com/message/10692405
 	 */
 	class WrapEditorKit extends StyledEditorKit {
-        ViewFactory defaultFactory=new WrapColumnFactory();
+		private static final long serialVersionUID = -7216503493330183634L;
+		ViewFactory defaultFactory=new WrapColumnFactory();
         public ViewFactory getViewFactory() {
             return defaultFactory;
         }

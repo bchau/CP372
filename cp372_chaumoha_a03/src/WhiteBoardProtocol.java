@@ -163,6 +163,6 @@ public class WhiteBoardProtocol {
 		return "";
 	}
 	public void clientDisconnected(Server.ClientConnection c) {
-		this.notifyClients(MESSAGE_HEAD + "Client Disconnected" + MESSAGE_TAIL, c);
+		this.notifyClients(MESSAGE_HEAD + "Peer Disconnected" + MESSAGE_TAIL, c);
 	}
 }

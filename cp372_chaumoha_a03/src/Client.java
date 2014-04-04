@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -18,7 +20,8 @@ class Client extends Thread{
     	private JEditorPane outText;
     	private JTextField inText;
     	private String fromServer = "", fromUser = "";
-    	public final String SEND_PASSWORD = "PASSWORD;PASSWORD;ENDPASSWORD";
+    	private String password = "PASSWORD;ENDPASSWORD";
+    	private boolean retry = true;
     	/**
     	 * Create a new Client, which by defninition interacts with a server
     	 * @param s - a socket on which to communicate
@@ -64,10 +67,19 @@ class Client extends Thread{
     						wb.clear();
     					}
     					else if(fromServer.startsWith("OK")){
+    						retry = false;
     						wb.setTextColour(fromServer);
     					}
     					else if(fromServer.startsWith("PASSWORDREQUEST")) {
-    						sendData(SEND_PASSWORD);
+    						if (this.password.split(";").length != 3 || retry ) {
+    							JPasswordField pf = new JPasswordField();
+    							int okCxl = JOptionPane.showConfirmDialog(outText, pf, "White Board Password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    							if (okCxl == JOptionPane.OK_OPTION) {
+    							  this.password = new String(pf.getPassword()).trim().replace(';', '\\');
+    							  this.password = "PASSWORD;" + this.password + ";ENDPASSWORD";
+    							}
+    						}
+    						sendData(password);
     					}
     					else{
     						wb.systemAppendOutputArea(fromServer+"\n");

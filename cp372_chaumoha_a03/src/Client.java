@@ -61,7 +61,7 @@ class Client extends Thread{
     						wb.drawLine(Line.parseLine(fromServer));
     					}
     					else if(fromServer.startsWith("MESSAGE")){
-    						//TODO:MESSAGE Handle from server
+    						wb.printMessage(fromServer);
     					}
     					else if(fromServer.startsWith("CLEAR")){
     						wb.clear();

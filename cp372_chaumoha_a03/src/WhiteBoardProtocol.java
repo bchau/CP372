@@ -24,6 +24,12 @@ public class WhiteBoardProtocol {
 
 	// responses
 	public static final String PASSWORD_REQUEST = "PASSWORDREQUEST;Please enter the correct password.;ENDREQUESTPASSWORD";
+	public static final String MESSAGE_HEAD = "MESSAGE,White Board Manager,#000000,1;";
+	public static final String MESSAGE_TAIL = ";ENDMESSAGE";
+	public static final String MESSAGE_FAULT = "There was an error with your action.";
+	public static final String MESSAGE_WELCOME = "Welcome to the White Board, to change your colour click the colour button.";
+	public static final String MESSAGE_SENDINGIMAGE = "Sending updated image.";
+	public static final String MESSAGE_SENDINGIMAGEDONE = "Image up to date.";
 
 	private String password = "";
 
@@ -46,7 +52,10 @@ public class WhiteBoardProtocol {
 		case PASSWORD:
 			if (password.equals(getPassword(input))) {
 				c.setColour(newClientColour());
+				c.send(MESSAGE_HEAD + MESSAGE_WELCOME + MESSAGE_TAIL);
+				c.send(MESSAGE_HEAD + MESSAGE_SENDINGIMAGE + MESSAGE_TAIL);
 				sendImage(c);
+				c.send(MESSAGE_HEAD + MESSAGE_SENDINGIMAGEDONE + MESSAGE_TAIL);
 				break;
 			}
 		case NEEDPASSWORD:
@@ -66,13 +75,11 @@ public class WhiteBoardProtocol {
 			break;
 		case FAULT:
 			result = "";
+			c.send(MESSAGE_HEAD + MESSAGE_FAULT + MESSAGE_TAIL);
 			return false;
 		default:
 			break;
 		}
-
-		System.out.println("Result: " + result);
-		System.out.println("Input: " + input);
 		if (result != "")
 			notifyClients(result, c);
 		return true;

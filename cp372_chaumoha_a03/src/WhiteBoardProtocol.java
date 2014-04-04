@@ -42,32 +42,34 @@ public class WhiteBoardProtocol {
 	public boolean processInput(int command, String input,
 			Server.ClientConnection c) {
 		String result = "";
-		synchronized (this) {
-			switch (command) {
-			case PASSWORD:
-				if (password.equals(getPassword(input)))
-					break;
-			case NEEDPASSWORD:
-				c.send(PASSWORD_REQUEST);
-				return false;
-			case LINE:
-				Line l = Line.parseLine(input);
-				result = l.toString();
-				break;
-			case CLEAR:
-				result = "CLEAR;ENDCLEAR";
-				clearImage();
-				break;
-			case MESSAGE:
-				result = input;
-				break;
-			case FAULT:
-				result = "";
-				return false;
-			default:
+		switch (command) {
+		case PASSWORD:
+			if (password.equals(getPassword(input))) {
+				c.send(newClientColour());
+				sendImage(c);
 				break;
 			}
+		case NEEDPASSWORD:
+			c.send(PASSWORD_REQUEST);
+			return false;
+		case LINE:
+			Line l = Line.parseLine(input);
+			result = l.toString();
+			break;
+		case CLEAR:
+			result = "CLEAR;ENDCLEAR";
+			clearImage();
+			break;
+		case MESSAGE:
+			result = input;
+			break;
+		case FAULT:
+			result = "";
+			return false;
+		default:
+			break;
 		}
+
 		System.out.println("Result: " + result);
 		System.out.println("Input: " + input);
 		if (result != "")
@@ -127,6 +129,10 @@ public class WhiteBoardProtocol {
 		String[] temp = in.split(";");
 		if (temp.length == 3)
 			return temp[1];
+		return "";
+	}
+
+	public String newClientColour() {
 		return "";
 	}
 }

@@ -18,7 +18,7 @@ class Client extends Thread{
     	private JEditorPane outText;
     	private JTextField inText;
     	private String fromServer = "", fromUser = "";
-    	public final String SEND_PASSWORD = "PASSWORD;WPASSWORD;ENDPASSWORD";
+    	public final String SEND_PASSWORD = "PASSWORD;PASSWORD;ENDPASSWORD";
     	/**
     	 * Create a new Client, which by defninition interacts with a server
     	 * @param s - a socket on which to communicate
@@ -63,6 +63,9 @@ class Client extends Thread{
     					}
     					else if(fromServer.startsWith("CLEAR")){
     						wb.clear();
+    					}
+    					else if(fromServer.startsWith("PASSWORDREQUEST")) {
+    						sendData(SEND_PASSWORD);
     					}
     					else{
     						outText.setText(outText.getText()+"\n"+fromServer);

@@ -89,7 +89,7 @@ public class Server {
 						Line l = null;
 						if (inputLine.startsWith("LINE") && inputLine.endsWith("ENDLINE")) {
 							l = Line.parseLine(inputLine);
-							l.strokeSize = 10;
+							//l.strokeSize = 10;
 							System.err.println(l.toString());
 							//out.println(l.toString());
 							this.protocol.notifyClients(l.toString(), this);

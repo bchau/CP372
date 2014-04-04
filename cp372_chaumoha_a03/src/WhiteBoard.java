@@ -61,7 +61,7 @@ public class WhiteBoard {
 	private Socket socket = null;
 	private SocketFactory socketfactory = null;
 	private Client client = null;
-
+	private boolean isConnected = false;
 	
 	//ImageBuffering
     private BufferedImage canvasImage;
@@ -148,7 +148,7 @@ public class WhiteBoard {
             imageLabel.addMouseMotionListener(new MouseMotionListener(){
             	@Override
             	public void mouseDragged(MouseEvent arg0) {
-            		if (SwingUtilities.isLeftMouseButton(arg0)&& clickHeld == true){
+            		if (SwingUtilities.isLeftMouseButton(arg0)&& clickHeld == true && isConnected){
             			points.add(new DrawnPoint(arg0.getPoint()));
             			pointsSent.add(new DrawnPoint(arg0.getPoint()));
 
@@ -169,7 +169,7 @@ public class WhiteBoard {
             imageLabel.addMouseListener(new MouseListener(){
             	@Override
                 public void mousePressed(MouseEvent arg0) {
-            		if (SwingUtilities.isLeftMouseButton(arg0)){
+            		if (SwingUtilities.isLeftMouseButton(arg0)&& isConnected){
             			temp = new ArrayList<DrawnPoint>();
             			pointsSent = new ArrayList<DrawnPoint>();
             			temp.addAll(points);
@@ -181,7 +181,7 @@ public class WhiteBoard {
             			draw(arg0.getPoint(),null,textColour,stroke);
             			synchronized(this){ clickHeld = true; }
             		}
-                    else if (SwingUtilities.isRightMouseButton(arg0)){
+                    else if (SwingUtilities.isRightMouseButton(arg0)&& isConnected){
                     	if (clickHeld){
                     		canvasImage.setData(tempImageDetails);
                     		imageLabel.repaint();
@@ -208,7 +208,7 @@ public class WhiteBoard {
 
 				@Override
 				public void mouseReleased(MouseEvent arg0) {
-					if(SwingUtilities.isLeftMouseButton(arg0)){
+					if(SwingUtilities.isLeftMouseButton(arg0)&& isConnected){
 						synchronized(this){
 							clickHeld = false;
 						}
@@ -233,7 +233,7 @@ public class WhiteBoard {
             gui.add(imageScroll,BorderLayout.CENTER);
     		
             final SpinnerNumberModel strokeModel = 
-                    new SpinnerNumberModel(3,1,16,1);
+                    new SpinnerNumberModel(penSize,1,20,1);
             JSpinner strokeSize = new JSpinner(strokeModel);
             ChangeListener strokeListener = new ChangeListener() {
                 @Override
@@ -350,6 +350,7 @@ public class WhiteBoard {
 						connectToggle.setSelected(false);
 						outputArea.append("Connected.\n\n");
 						outputArea.append("Connected.\n\n");
+						isConnected = true;
 						
 						//connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {

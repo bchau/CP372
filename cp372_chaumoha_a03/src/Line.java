@@ -35,7 +35,7 @@ public class Line implements Serializable{
 		String d = s.substring(3,5);
 		String c = s.substring(5,7);
 		
-		int r = a.getBytes()[0];
+		int r = new Integer(s.substring(1,3));
 		int g = new Integer(s.substring(3,4));
 		int b = new Integer(s.substring(5,6));
 		
@@ -48,7 +48,7 @@ public class Line implements Serializable{
 		String colourRGB = first[2];
 		
 		ArrayList<DrawnPoint> p = new ArrayList<DrawnPoint>();
-		for (int i = 1; i < tokens.length; i++){
+		for (int i = 1; i < tokens.length-1; i++){
 			String[] temp = tokens[i].split(",");
 			p.add(new DrawnPoint(Integer.parseInt(temp[0]),Integer.parseInt(temp[1])));
 		}

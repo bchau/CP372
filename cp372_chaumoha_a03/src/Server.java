@@ -75,6 +75,7 @@ public class Server {
 			} catch (IOException e) {
 				System.err.println("Error creating connection to client.");
 			}
+			System.out.println("Client IP: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 		}
 
 		public void run() {
@@ -88,7 +89,8 @@ public class Server {
 						if (inputLine.startsWith("LINE") && inputLine.endsWith("ENDLINE")) {
 							l = Line.parseLine(inputLine);
 							l.strokeSize = 10;
-							out.println(l);
+							System.err.println(l.toString());
+							out.println(l.toString());
 						}
 
 					} catch (NullPointerException e) { // on error end run

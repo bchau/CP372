@@ -1,3 +1,5 @@
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 
@@ -8,15 +10,27 @@ public class WhiteBoardProtocol {
 	public static final int WBPASSWORD = 1;
 	public static final int FAULT = 3;
 	
+	// bufferedimage dimensions
+	private static int drawAreaWidth = 640;
+    private static int drawAreaHeight = 640;
+	
 	//keywords
 	public static final String[] keywords = {"SUBMIT"};
 	
-	//lines
+	// connections
 	private ArrayList<Server.ClientConnection> clients = new ArrayList<Server.ClientConnection>();
+	// buffered image
+	private BufferedImage bi = null;
 	
 	//responses
 	public static final String LINE_SUCCESS = "Line submitted successfully.\n";
 	public static final String PARSE_FAIL = "Unable to parse request.\n";
+	
+	public WhiteBoardProtocol () {
+		bi = new BufferedImage(drawAreaHeight, drawAreaHeight, BufferedImage.TYPE_INT_RGB);
+		bi.getGraphics().setColor(Color.RED);
+		System.out.print(bi.getData());
+	}
 	
 	/**
 	 * 

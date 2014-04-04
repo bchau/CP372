@@ -52,7 +52,6 @@ class Client extends Thread{
     				switch (stateTemp) {
     				case STATE_RUN:
     					fromServer = in.readLine();
-    					System.out.println(fromServer);
     					if (fromServer == null)
     						break;
     					if (fromServer.startsWith("LINE")){
@@ -64,11 +63,14 @@ class Client extends Thread{
     					else if(fromServer.startsWith("CLEAR")){
     						wb.clear();
     					}
+    					else if(fromServer.startsWith("OK")){
+    						wb.setTextColour(fromServer);
+    					}
     					else if(fromServer.startsWith("PASSWORDREQUEST")) {
     						sendData(SEND_PASSWORD);
     					}
     					else{
-    						outText.setText(outText.getText()+"\n"+fromServer);
+    						wb.systemAppendOutputArea(fromServer+"\n");
     					}
     					outText.setCaretPosition(outText.getDocument().getLength());
     					if (fromServer.equals("Bye."))
@@ -84,10 +86,10 @@ class Client extends Thread{
     					stateTemp = _state;
     				}
     			}
-    			outText.setText(outText.getText()+"\n"+fromServer  );
+    			wb.systemAppendOutputArea(fromServer+"\n");
     		} catch (IOException e) {
     			_state = STATE_STOP;
-    			outText.setText(outText.getText()+"Server disconnected."+"\n");
+    			wb.systemAppendOutputArea("Server disconnected.\n");
     		}
     		
     	}

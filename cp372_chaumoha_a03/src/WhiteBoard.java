@@ -98,7 +98,7 @@ public class WhiteBoard {
     private boolean clickCanceled = false;
     private int penSize = 3;
     private Stroke stroke = new BasicStroke(penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
-    
+    private JButton colourButton;
     //ChatBox Preferences
     private StyledDocument doc;
     private Style style;
@@ -267,21 +267,16 @@ public class WhiteBoard {
 			strokeSize.addChangeListener(strokeListener);
 			connectionPane.add(strokeSize);
 
-			JButton colourButton = new JButton("Colour");
+			colourButton = new JButton("Colour");
 			colourButton.setToolTipText("Choose a Color");
-			if (this.ENABLED_TEXT_COLOUR_SELECTION) {
-				ActionListener textColourListener = new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						Color c = JColorChooser.showDialog(gui,
-								"Choose a color", textColour);
-						if (c != null) {
-							textColour = c;
-							clear(colourSample, c);
-						}
-					}
-				};
-				colourButton.addActionListener(textColourListener);
-			}
+			colourButton.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					
+				}
+				
+			});
 			colourButton.setIcon(new ImageIcon(colourSample));
 			connectionPane.add(colourButton);
 			clear(colourSample, textColour);
@@ -408,7 +403,7 @@ public class WhiteBoard {
 		if (socket == null && client == null) { // if there is no connection,
 												// create one.
 			
-			appendOutputArea("Connecting...\n");
+			systemAppendOutputArea("Connecting...\n");
 			connectToggle.setText("Connecting");
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
@@ -424,15 +419,14 @@ public class WhiteBoard {
 									"Could not create connection, error with host");
 						connectToggle.setText("Disconnect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Connected.\n\n");
-						appendOutputArea("Connected.\n\n");
+						systemAppendOutputArea("Connected.\n");;
 						isConnected = true;
 						client.sendData(client.SEND_PASSWORD);
 						// connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Could not find host.\n\n");
+						appendOutputArea("Could not find host.\n");
 					} catch (NumberFormatException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
@@ -440,17 +434,17 @@ public class WhiteBoard {
 					} catch (IOException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Could not connect.\n\n");
+						appendOutputArea("Could not connect.\n");
 					} catch (Exception e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea(e.getMessage() + "\n\n");
+						appendOutputArea(e.getMessage() + "\n");
 					}
 				}
 			});
 			
 		} else {
-			appendOutputArea("Disconnecting...\n");
+			systemAppendOutputArea("Disconnecting...\n");
 			connectToggle.setText("Disconnecting");
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
@@ -461,7 +455,7 @@ public class WhiteBoard {
 						socket = null;
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Disconnected.\n\n");
+						systemAppendOutputArea("Disconnected.\n");
 					} catch (Exception e) {
 						connectToggle.setText("Disconnect");
 						connectToggle.setSelected(true);
@@ -511,8 +505,19 @@ public class WhiteBoard {
 		}
 	}
 	
-	private void appendOutputArea(String string){
-		appendOutputArea(string, Color.blue);
+	protected void appendOutputArea(String string){
+		appendOutputArea(string, textColour);
+	}
+	
+	protected void systemAppendOutputArea(String string){
+		appendOutputArea(string, Color.BLACK);
+	}
+	
+	protected void setTextColour(String string){
+		String[] temp = string.split(";");
+		textColour = Line.getColourFromHex(temp[1]);
+		clear(colourSample,textColour);
+		colourButton.updateUI();
 	}
 	
 	/**

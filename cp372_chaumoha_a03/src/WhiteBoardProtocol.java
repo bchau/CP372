@@ -151,7 +151,6 @@ public class WhiteBoardProtocol {
 
 	public Color newClientColour() {
 		Random rand = new Random();
-		float h = rand.nextFloat(), s = (float) 0.5, b = (float) 0.5;
-		return Color.getHSBColor(h, s, b);
+		return new Color(rand.nextInt(), rand.nextInt(), rand.nextInt());
 	}
 }

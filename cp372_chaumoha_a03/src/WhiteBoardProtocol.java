@@ -46,16 +46,17 @@ public class WhiteBoardProtocol {
 	 */
 	public boolean processInput(int command, String input,
 			Server.ClientConnection c) {
-		System.out.println(input);
 		String result = "";
 		switch (command) {
 		case PASSWORD:
 			if (password.equals(getPassword(input))) {
 				c.setColour(newClientColour());
-				c.send(MESSAGE_HEAD + MESSAGE_WELCOME + MESSAGE_TAIL);
-				c.send(MESSAGE_HEAD + MESSAGE_SENDINGIMAGE + MESSAGE_TAIL);
-				sendImage(c);
-				c.send(MESSAGE_HEAD + MESSAGE_SENDINGIMAGEDONE + MESSAGE_TAIL);
+				if (!c.isVaidated()) {
+					c.send(MESSAGE_HEAD + MESSAGE_WELCOME + MESSAGE_TAIL);
+					c.send(MESSAGE_HEAD + MESSAGE_SENDINGIMAGE + MESSAGE_TAIL);
+					sendImage(c);
+					c.send(MESSAGE_HEAD + MESSAGE_SENDINGIMAGEDONE + MESSAGE_TAIL);
+				}
 				break;
 			}
 		case NEEDPASSWORD:
@@ -126,7 +127,6 @@ public class WhiteBoardProtocol {
 				while (i < aSize) {
 					synchronized (lines) {
 						String line = lines.get(i).toString();
-						System.out.println("Update: " + line);
 						c.send(line);
 						c.send(lines.get(i).toString());
 						aSize = lines.size();
@@ -161,5 +161,8 @@ public class WhiteBoardProtocol {
 		if (!temp[1].equals(""))
 			return s;
 		return "";
+	}
+	public void clientDisconnected(Server.ClientConnection c) {
+		this.notifyClients(MESSAGE_HEAD + "Client Disconnected" + MESSAGE_TAIL, c);
 	}
 }

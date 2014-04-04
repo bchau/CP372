@@ -76,6 +76,7 @@ public class Server {
 		private WhiteBoardProtocol protocol;
 		private BufferedReader in;
 		private Color colour = null;
+		private boolean valid = false;
 
 		public ClientConnection(Socket s, WhiteBoardProtocol p) {
 			this.clientSocket = s;
@@ -93,7 +94,6 @@ public class Server {
 
 		public void run() {
 			int code = -1;
-			boolean valid = false;
 			try {
 				while ((inputLine = in.readLine()) != null || code != -1) {
 					try {
@@ -132,6 +132,7 @@ public class Server {
 			} catch (IOException e) {
 				System.err.println("Client was disconnected.");
 			}
+			this.protocol.clientDisconnected(this);
 		}
 
 		public boolean equals(ClientConnection o) {
@@ -139,13 +140,16 @@ public class Server {
 		}
 
 		public void send(String message) {
-			System.out.println("Message to [" + this.clientSocket.getInetAddress() + "]: " + message);
+			//System.out.println("Message to [" + this.clientSocket.getInetAddress() + "]: " + message);
 			out.println(message);
 		}
 
 		public void setColour(Color c) {
 				this.colour = c;
 				this.send("OK;" + Line.getColourHex(this.colour) + ";ENDOK");
+		}
+		public boolean isVaidated() {
+			return this.valid;
 		}
 	}
 }

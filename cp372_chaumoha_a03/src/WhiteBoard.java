@@ -402,6 +402,7 @@ public class WhiteBoard {
 
 				@Override
 				public void focusLost(FocusEvent arg0) {
+					nameArea.setText(nameArea.getText().replace(';', '\\'));
 					if (!nameArea.getText().trim().equals("") && client != null){
 						name = nameArea.getText();
 						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
@@ -669,7 +670,6 @@ public class WhiteBoard {
 		String name = temp2[1];
 		Color c = Line.getColourFromHex(temp2[2]);
 		appendOutputArea(name+" :"+temp[1]+"\n",c);
-		System.out.println(string);
 	}
 	
 	public void clientDisconnected(){

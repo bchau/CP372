@@ -23,13 +23,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
@@ -38,11 +36,20 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.BoxView;
+import javax.swing.text.ComponentView;
+import javax.swing.text.Element;
+import javax.swing.text.IconView;
+import javax.swing.text.LabelView;
+import javax.swing.text.ParagraphView;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
 
 public class WhiteBoard {
 	
@@ -292,6 +299,7 @@ public class WhiteBoard {
     		//Text area and input
     		JPanel messageBox = new JPanel(new BorderLayout());
     		outputArea = new JTextPane();
+    		outputArea.setEditorKit(new WrapEditorKit());
     		//outputArea.setLineWrap(true);
     		outputArea.setEditable(false);
     		outputArea.setBackground(Color.LIGHT_GRAY);
@@ -366,7 +374,6 @@ public class WhiteBoard {
      */
     private void draw(Point initialPoint, Point finalPoint,Color c, Stroke s){
     	Graphics2D g = this.canvasImage.createGraphics();
-        //g.setRenderingHints(renderingHints);
         g.setColor(c);
         g.setStroke(s);
         if (finalPoint != null)
@@ -484,7 +491,6 @@ public class WhiteBoard {
         try {
 			doc.insertString(doc.getLength(), string, style);
 		} catch (BadLocationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
@@ -492,4 +498,65 @@ public class WhiteBoard {
 	private void appendOutputArea(String string){
 		appendOutputArea(string, Color.blue);
 	}
+	
+	/**
+	 * Online solution for JTextPane word wrapping
+	 * @author https://community.oracle.com/message/10692405
+	 */
+	class WrapEditorKit extends StyledEditorKit {
+        ViewFactory defaultFactory=new WrapColumnFactory();
+        public ViewFactory getViewFactory() {
+            return defaultFactory;
+        }
+
+    }
+
+	/**
+	 * Online solution for JTextPane word wrapping
+	 * @author https://community.oracle.com/message/10692405
+	 */
+    class WrapColumnFactory implements ViewFactory {
+        public View create(Element elem) {
+            String kind = elem.getName();
+            if (kind != null) {
+                if (kind.equals(AbstractDocument.ContentElementName)) {
+                    return new WrapLabelView(elem);
+                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+                    return new ParagraphView(elem);
+                } else if (kind.equals(AbstractDocument.SectionElementName)) {
+                    return new BoxView(elem, View.Y_AXIS);
+                } else if (kind.equals(StyleConstants.ComponentElementName)) {
+                    return new ComponentView(elem);
+                } else if (kind.equals(StyleConstants.IconElementName)) {
+                    return new IconView(elem);
+                }
+            }
+
+            // default to text display
+            return new LabelView(elem);
+        }
+    }
+
+    /**
+	 * Online solution for JTextPane word wrapping
+	 * @author https://community.oracle.com/message/10692405
+	 */
+    class WrapLabelView extends LabelView {
+        public WrapLabelView(Element elem) {
+            super(elem);
+        }
+
+        public float getMinimumSpan(int axis) {
+            switch (axis) {
+                case View.X_AXIS:
+                    return 0;
+                case View.Y_AXIS:
+                    return super.getMinimumSpan(axis);
+                default:
+                    throw new IllegalArgumentException("Invalid axis: " + axis);
+            }
+        }
+
+    }
+
 }

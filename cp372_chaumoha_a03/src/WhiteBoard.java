@@ -381,7 +381,8 @@ public class WhiteBoard {
 
 				@Override
 				public void keyReleased(KeyEvent arg0) {
-					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !nameArea.getText().trim().equals("")){
+					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !nameArea.getText().trim().equals("")&& client != null){
+						name = nameArea.getText();
 						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
 					}
 				}
@@ -401,8 +402,10 @@ public class WhiteBoard {
 
 				@Override
 				public void focusLost(FocusEvent arg0) {
-					if (!nameArea.getText().trim().equals(""))
+					if (!nameArea.getText().trim().equals("") && client != null){
+						name = nameArea.getText();
 						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
+					}
 					else
 						nameArea.setText("Enter your name: ");
 				}
@@ -435,7 +438,7 @@ public class WhiteBoard {
 				public void keyReleased(KeyEvent arg0) {
 					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !inputArea.getText().trim().equals("")){
 						
-						appendOutputArea("You: " + inputArea.getText() + "\n");
+						appendOutputArea(name+": " + inputArea.getText() + "\n");
 						if (client != null) {
 							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");

@@ -71,7 +71,9 @@ public class WhiteBoardProtocol {
 			clearImage();
 			break;
 		case MESSAGE:
-			result = input;
+			result = msgValidate(input);
+			if (result == "")
+				return false;
 			break;
 		case FAULT:
 			result = "";
@@ -153,5 +155,11 @@ public class WhiteBoardProtocol {
 		int g = (int)(Math.random()*256);
 		int b = (int)(Math.random()*256);
 		return new Color(r,g,b);
+	}
+	private String msgValidate(String s){
+		String[] temp = s.split(";");
+		if (!temp[1].equals(""))
+			return s;
+		return "";
 	}
 }

@@ -668,7 +668,8 @@ public class WhiteBoard {
 		String[] temp2 = temp[0].split(",");
 		String name = temp2[1];
 		Color c = Line.getColourFromHex(temp2[2]);
-		appendOutputArea(name+" :"+temp[1]+"\n",c);
+		if (!temp[1].equals(""))
+			appendOutputArea(name+" :"+temp[1]+"\n",c);
 		System.out.println(string);
 	}
 	

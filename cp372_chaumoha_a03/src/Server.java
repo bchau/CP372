@@ -90,9 +90,14 @@ public class Server {
 			try {
 				while ((inputLine = in.readLine()) != null || code != -1) {
 					try {
-						if (inputLine.startsWith("PASSWORD")
+						if (valid == false) {
+							if (inputLine.startsWith("PASSWORD")
 								&& inputLine.endsWith("ENDPASSWORD")) {
-							code = WhiteBoardProtocol.PASSWORD;
+									code = WhiteBoardProtocol.PASSWORD;
+							} else {
+								code = WhiteBoardProtocol.NEEDPASSWORD;
+								continue;
+							}
 						} else if (inputLine.startsWith("LINE")
 								&& inputLine.endsWith("ENDLINE")) {
 							code = WhiteBoardProtocol.LINE;
@@ -105,7 +110,8 @@ public class Server {
 						} else {
 							code = WhiteBoardProtocol.FAULT;
 						}
-						this.protocol.processInput(code, inputLine, this);
+						boolean res = this.protocol.processInput(code, inputLine, this);
+						if(valid == false) valid = res;
 					} catch (NullPointerException e) { // on error end run
 						System.err.println("Client was disconnected.");
 						clientSocket.close();

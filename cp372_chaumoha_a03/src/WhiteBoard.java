@@ -103,6 +103,7 @@ public class WhiteBoard {
     //ChatBox Preferences
     private StyledDocument doc;
     private Style style;
+    private String name = "User";
     
     /**
      * Creates and populates the graphic user interface.
@@ -436,7 +437,7 @@ public class WhiteBoard {
 						
 						appendOutputArea("You: " + inputArea.getText() + "\n");
 						if (client != null) {
-							client.sendData("MESSAGE;" + inputArea.getText()
+							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");
 						}
 						inputArea.setText("");
@@ -459,7 +460,7 @@ public class WhiteBoard {
 					if (!inputArea.getText().trim().equals("")) {
 						appendOutputArea("You: " + inputArea.getText() + "\n");
 						if (client != null) {
-							client.sendData("MESSAGE;" + inputArea.getText()
+							client.sendData("MESSAGE,"+name+","+Line.getColourHex(textColour)+",0;" + inputArea.getText()
 									+ ";ENDMESSAGE");
 						}
 					}

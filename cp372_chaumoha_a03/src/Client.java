@@ -53,10 +53,15 @@ class Client extends Thread{
     					fromServer = in.readLine();
     					if (fromServer == null)
     						break;
-    					// add to the output text area
-    					outText.append(fromServer + "\n");
-    					
-    					wb.drawLine(Line.parseLine(fromServer));
+    					if (fromServer.startsWith("LINE;")){
+    						wb.drawLine(Line.parseLine(fromServer));
+    					}
+    					else if(fromServer.startsWith("MESSAGE;")){
+    						//TODO:MESSAGE Handle from server
+    					}
+    					else if(fromServer.startsWith("CLEAR;")){
+    						wb.clear();
+    					}
     					outText.setCaretPosition(outText.getDocument().getLength());
     					if (fromServer.equals("Bye."))
     						synchronized (this) {

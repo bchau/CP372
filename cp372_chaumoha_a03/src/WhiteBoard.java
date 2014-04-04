@@ -13,18 +13,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.KeyStore;
 import java.util.ArrayList;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -269,13 +263,51 @@ public class WhiteBoard {
     		connectionPane.add(colourButton);
     		clear(colourSample,textColour);
     		
+    		JButton clearButton = new JButton ("Clear");
+    		clearButton.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					clear(canvasImage,Color.WHITE);
+					if (client != null)
+						client.sendData("CLEAR;ENDCLEAR");
+				}
+    			
+    		});
+    		connectionPane.add(clearButton);
+    		
     		gui.add(drawPanel);
     		gui.add(output,BorderLayout.SOUTH);
     		
+    		//Text area and input
+    		JPanel messageBox = new JPanel(new BorderLayout());
     		outputArea = new JTextArea(10, 20);
     		outputArea.setLineWrap(true);
     		outputArea.setEditable(false);
-    		gui.add(new JScrollPane(outputArea),BorderLayout.EAST);
+    		outputArea.setBackground(Color.LIGHT_GRAY);
+    		messageBox.add(new JScrollPane(outputArea),BorderLayout.CENTER);
+    		
+    		JPanel inputBox = new JPanel(new FlowLayout());
+    		inputArea = new JTextArea(5,20);
+    		inputArea.setBackground(Color.LIGHT_GRAY);
+    		inputArea.setLineWrap(true);
+    		inputBox.add(new JScrollPane(inputArea));
+    		JButton sendButton = new JButton("SEND");
+    		sendButton.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					outputArea.append("You: "+inputArea.getText()+"\n");
+					if (client != null){
+						client.sendData("MESSAGE;"+inputArea.getText()+";ENDMESSAGE");
+					}
+					inputArea.setText("");
+				}
+    			
+    		});
+    		inputBox.add(sendButton);
+    		messageBox.add(inputBox,BorderLayout.SOUTH);
+    		gui.add(messageBox,BorderLayout.EAST);
     	}
     	
     	return gui;
@@ -305,8 +337,11 @@ public class WhiteBoard {
         g.setColor(colour);
         g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
         g.dispose();
+        this.imageLabel.repaint();
     }
-    
+    public void clear(){
+    	clear(canvasImage,Color.WHITE);
+    }
     /**
      * Draws a line of 'textColour' between the two points
      * @param initialPoint

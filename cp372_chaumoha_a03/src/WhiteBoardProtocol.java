@@ -47,6 +47,7 @@ public class WhiteBoardProtocol {
 	 */
 	public boolean processInput(int command, String input,
 			Server.ClientConnection c) {
+		System.out.println(input);
 		String result = "";
 		switch (command) {
 		case PASSWORD:

@@ -18,7 +18,7 @@ class Client extends Thread{
     	private JEditorPane outText;
     	private JTextField inText;
     	private String fromServer = "", fromUser = "";
-    	public final String SEND_PASSWORD = "WBPASSWORD;password";
+    	public final String SEND_PASSWORD = "PASSWORD;WPASSWORD;ENDPASSWORD";
     	/**
     	 * Create a new Client, which by defninition interacts with a server
     	 * @param s - a socket on which to communicate
@@ -52,6 +52,7 @@ class Client extends Thread{
     				switch (stateTemp) {
     				case STATE_RUN:
     					fromServer = in.readLine();
+    					System.out.println(fromServer);
     					if (fromServer == null)
     						break;
     					if (fromServer.startsWith("LINE")){
@@ -80,9 +81,10 @@ class Client extends Thread{
     					stateTemp = _state;
     				}
     			}
-    			outText.setText(outText.getText()+fromServer + "\n");
+    			outText.setText(outText.getText()+"\n"+fromServer  );
     		} catch (IOException e) {
     			_state = STATE_STOP;
+    			outText.setText(outText.getText()+"Server disconnected."+"\n");
     		}
     		
     	}

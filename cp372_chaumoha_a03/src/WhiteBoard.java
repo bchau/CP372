@@ -392,7 +392,7 @@ public class WhiteBoard {
 						appendOutputArea("Connected.\n\n");
 						appendOutputArea("Connected.\n\n");
 						isConnected = true;
-						
+			    		client.sendData(client.SEND_PASSWORD);
 						//connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");

@@ -5,11 +5,12 @@ import java.util.ArrayList;
 public class WhiteBoardProtocol {
 
 	// requests
-	public static final int PASSWORD = 0;
-	public static final int LINE = 1;
-	public static final int CLEAR = 2;
-	public static final int MESSAGE = 3;
-	public static final int FAULT = 4;
+	public static final int NEEDPASSWORD = 0;
+	public static final int PASSWORD = 1;
+	public static final int LINE = 2;
+	public static final int CLEAR = 3;
+	public static final int MESSAGE = 4;
+	public static final int FAULT = 5;
 
 	// keywords
 	public static final String[] keywordsStart = { "PASSWORD", "LINE", "CLEAR",
@@ -22,8 +23,7 @@ public class WhiteBoardProtocol {
 	private ArrayList<Line> lines = new ArrayList<Line>();
 
 	// responses
-	public static final String LINE_SUCCESS = "Line submitted successfully.\n";
-	public static final String PARSE_FAIL = "Unable to parse request.\n";
+	public static final String PASSWORD_REQUEST = "PASSWORDREQUEST;Please enter the correct password.;ENDREQUESTPASSWORD";
 
 	private String password = "";
 
@@ -45,9 +45,11 @@ public class WhiteBoardProtocol {
 		synchronized (this) {
 			switch (command) {
 			case PASSWORD:
-				if (!password.equals(getPassword(input)))
-					return false;
-				break;
+				if (password.equals(getPassword(input)))
+					break;
+			case NEEDPASSWORD:
+				c.send(PASSWORD_REQUEST);
+				return false;
 			case LINE:
 				Line l = Line.parseLine(input);
 				result = l.toString();
@@ -60,10 +62,14 @@ public class WhiteBoardProtocol {
 				result = input;
 				break;
 			case FAULT:
+				result = "";
+				return false;
 			default:
 				break;
 			}
 		}
+		System.out.println("Result: " + result);
+		System.out.println("Input: " + input);
 		if (result != "")
 			notifyClients(result, c);
 		return true;

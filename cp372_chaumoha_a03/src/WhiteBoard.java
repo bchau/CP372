@@ -61,7 +61,7 @@ public class WhiteBoard {
 	private Socket socket = null;
 	private SocketFactory socketfactory = null;
 	private Client client = null;
-	private boolean isConnected = false;
+	private boolean isConnected = true;
 	
 	//ImageBuffering
     private BufferedImage canvasImage;
@@ -83,6 +83,7 @@ public class WhiteBoard {
     private ArrayList<DrawnPoint> temp;
     private ArrayList<DrawnPoint> pointsSent;
     private boolean clickHeld = false;
+    private boolean clickCanceled = false;
     private int penSize = 3;
     private Stroke stroke = new BasicStroke(penSize,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,1.7f);
     
@@ -170,6 +171,7 @@ public class WhiteBoard {
             	@Override
                 public void mousePressed(MouseEvent arg0) {
             		if (SwingUtilities.isLeftMouseButton(arg0)&& isConnected){
+            			clickCanceled = false;
             			temp = new ArrayList<DrawnPoint>();
             			pointsSent = new ArrayList<DrawnPoint>();
             			temp.addAll(points);
@@ -190,6 +192,7 @@ public class WhiteBoard {
                     		synchronized(this){
         						clickHeld = false;
         					}
+                    		clickCanceled = true;
                     	}
                     }
                 }
@@ -214,18 +217,18 @@ public class WhiteBoard {
 						}
 
 						String s = new Line(pointsSent,penSize,textColour).toString();
-						outputArea.append(s);
 
-						try{
-							client.sendData(s);
-						}
-						catch(Exception e){
-							outputArea.append("Could not send Data.\n");
+						if (!clickCanceled){
+							try{
+								client.sendData(s);
+							}
+							catch(Exception e){
+								outputArea.append("Could not send Data.\n");
+							}
 						}
 					}
 				}
             });
-            drawPanel.add(imageLabel);
     		clear(canvasImage,Color.white);
     		
             JScrollPane imageScroll = new JScrollPane(drawPanel);
@@ -365,7 +368,6 @@ public class WhiteBoard {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
 						outputArea.append("Could not connect.\n\n");
-						e.printStackTrace();
 					} catch (Exception e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);

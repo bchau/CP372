@@ -2,10 +2,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ConnectException;
 import java.net.Socket;
 
-import javax.swing.JTextArea;
+import javax.swing.JEditorPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 class Client extends Thread{
@@ -15,23 +15,24 @@ class Client extends Thread{
     	private PrintWriter out = null;
     	private BufferedReader in = null;
     	private WhiteBoard wb = null;
-    	private JTextArea inText, outText;
+    	private JEditorPane outText;
+    	private JTextField inText;
     	private String fromServer = "", fromUser = "";
     	public final String SEND_PASSWORD = "WBPASSWORD;password";
     	/**
     	 * Create a new Client, which by defninition interacts with a server
     	 * @param s - a socket on which to communicate
     	 * @param i - Input jtextarea
-    	 * @param o - output jtextarea
+    	 * @param outputArea - output jtextarea
     	 * @throws IOException - thrown if we can not create a buffered reader or print writer
     	 */
-    	public Client(Socket s, JTextArea o,WhiteBoard wb) throws IOException {
+    	public Client(Socket s, JEditorPane outputArea,WhiteBoard wb) throws IOException {
     		super();
     		this.wb = wb;
     		socket = s;
     		out = new PrintWriter(socket.getOutputStream(), true);
     		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    		outText = o;
+    		outText = outputArea;
     		_state = STATE_RUN;
     		this.start();
     		System.out.println("Client: Connected");
@@ -62,6 +63,9 @@ class Client extends Thread{
     					else if(fromServer.startsWith("CLEAR")){
     						wb.clear();
     					}
+    					else{
+    						outText.setText(outText.getText()+"\n"+fromServer);
+    					}
     					outText.setCaretPosition(outText.getDocument().getLength());
     					if (fromServer.equals("Bye."))
     						synchronized (this) {
@@ -76,7 +80,7 @@ class Client extends Thread{
     					stateTemp = _state;
     				}
     			}
-    			outText.append(fromServer + "\n");
+    			outText.setText(outText.getText()+fromServer + "\n");
     		} catch (IOException e) {
     			_state = STATE_STOP;
     		}

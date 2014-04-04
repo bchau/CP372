@@ -23,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -44,8 +45,8 @@ public class WhiteBoard {
 	 * 	http://stackoverflow.com/questions/12683533/drawing-a-rectangle-that-wont-disappear-in-next-paint/12683632#12683632
 	 */
 	//Fields
-	private JTextField ipField, portField;
-	private JTextArea inputArea, outputArea;
+	private JTextField inputArea,ipField, portField;
+	private JEditorPane outputArea;
 	private JToggleButton connectToggle;
 	
 	//Input Fields
@@ -217,7 +218,7 @@ public class WhiteBoard {
 								client.sendData(s);
 							}
 							catch(Exception e){
-								outputArea.append("Could not send Data.\n");
+								appendOutputArea("Could not send Data.\n");
 							}
 						}
 					}
@@ -281,25 +282,27 @@ public class WhiteBoard {
     		
     		//Text area and input
     		JPanel messageBox = new JPanel(new BorderLayout());
-    		outputArea = new JTextArea(10, 20);
-    		outputArea.setLineWrap(true);
+    		outputArea = new JEditorPane();
+    		//outputArea.setLineWrap(true);
     		outputArea.setEditable(false);
     		outputArea.setBackground(Color.LIGHT_GRAY);
     		messageBox.add(new JScrollPane(outputArea),BorderLayout.CENTER);
     		
     		JPanel inputBox = new JPanel(new FlowLayout());
-    		inputArea = new JTextArea(5,20);
+    		inputArea = new JTextField("",15);
     		inputArea.setBackground(Color.LIGHT_GRAY);
-    		inputArea.setLineWrap(true);
+    		
     		inputBox.add(new JScrollPane(inputArea));
     		JButton sendButton = new JButton("SEND");
     		sendButton.addActionListener(new ActionListener(){
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					outputArea.append("You: "+inputArea.getText()+"\n");
-					if (client != null){
-						client.sendData("MESSAGE;"+inputArea.getText()+";ENDMESSAGE");
+					if(!inputArea.getText().trim().equals("")){
+						appendOutputArea("You: "+inputArea.getText()+"\n");
+						if (client != null){
+							client.sendData("MESSAGE;"+inputArea.getText()+";ENDMESSAGE");
+						}
 					}
 					inputArea.setText("");
 				}
@@ -374,7 +377,7 @@ public class WhiteBoard {
 	private void connectDisconnect() {
 		
 		if (socket == null && client == null) { // if there is no connection, create one.
-			outputArea.append("Connecting...\n");
+			appendOutputArea("Connecting...\n");
 			connectToggle.setText("Connecting");
 			SwingUtilities.invokeLater(new Runnable() {
 			    public void run() {
@@ -386,32 +389,32 @@ public class WhiteBoard {
 							throw new Exception("Could not create connection, error with host");
 						connectToggle.setText("Disconnect");
 						connectToggle.setSelected(false);
-						outputArea.append("Connected.\n\n");
-						outputArea.append("Connected.\n\n");
+						appendOutputArea("Connected.\n\n");
+						appendOutputArea("Connected.\n\n");
 						isConnected = true;
 						
 						//connectToggle.setSelected(true);
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append("Could not find host.\n\n");
+						appendOutputArea("Could not find host.\n\n");
 					} catch (NumberFormatException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append("Please ensure port number is correct.\n");
+						appendOutputArea("Please ensure port number is correct.\n");
 					} catch (IOException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append("Could not connect.\n\n");
+						appendOutputArea("Could not connect.\n\n");
 					} catch (Exception e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append(e.getMessage()+"\n\n");
+						appendOutputArea(e.getMessage()+"\n\n");
 					}
 			    }
 			});
 		} else {
-			outputArea.append("Disconnecting...\n");
+			appendOutputArea("Disconnecting...\n");
 			connectToggle.setText("Disconnecting");
 			SwingUtilities.invokeLater(new Runnable() {
 			    public void run() {
@@ -422,7 +425,7 @@ public class WhiteBoard {
 						socket = null;
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						outputArea.append("Disconnected.\n\n");
+						appendOutputArea("Disconnected.\n\n");
 					} catch (Exception e) {
 						connectToggle.setText("Disconnect");
 						connectToggle.setSelected(true);
@@ -462,5 +465,7 @@ public class WhiteBoard {
 		});
 	}
 
-    
+	private void appendOutputArea(String string) {
+		outputArea.setText(outputArea.getText()+string);
+	}
 }

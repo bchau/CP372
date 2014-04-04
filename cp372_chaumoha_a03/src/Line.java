@@ -48,7 +48,7 @@ public class Line implements Serializable{
 		String colourRGB = first[2];
 		
 		ArrayList<DrawnPoint> p = new ArrayList<DrawnPoint>();
-		for (int i = 1; i < tokens.length; i++){
+		for (int i = 1; i < tokens.length-1; i++){
 			String[] temp = tokens[i].split(",");
 			p.add(new DrawnPoint(Integer.parseInt(temp[0]),Integer.parseInt(temp[1])));
 		}

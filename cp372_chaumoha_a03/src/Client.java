@@ -156,6 +156,13 @@ class Client extends Thread{
 			    }
     		});
     	}
+    	public synchronized void sendPassword() {
+    		SwingUtilities.invokeLater(new Runnable() {
+			    public void run() {
+					out.println(password);
+			    }
+    		});
+    	}
     	
     	
     	

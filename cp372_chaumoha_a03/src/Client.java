@@ -2,7 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.Socket;zzz
 
 import javax.swing.JEditorPane;
 import javax.swing.JTextField;
@@ -18,7 +18,7 @@ class Client extends Thread{
     	private JEditorPane outText;
     	private JTextField inText;
     	private String fromServer = "", fromUser = "";
-    	public final String SEND_PASSWORD = "PASSWORD;WPASSWORD;ENDPASSWORD";
+    	public final String SEND_PASSWORD = "PASSWORD;PASSWORD;ENDPASSWORD";
     	/**
     	 * Create a new Client, which by defninition interacts with a server
     	 * @param s - a socket on which to communicate

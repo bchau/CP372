@@ -41,8 +41,13 @@ public class Server {
 				System.exit(1);
 			}
 		}
-
-		WhiteBoardProtocol p = new WhiteBoardProtocol("PASSWORD");
+		String password = "";
+		while(password.length() < 4) {
+			System.out.println("Please enter a password for the white booard (4 character minimum)");
+			password = new BufferedReader(new InputStreamReader(System.in)).readLine().replace(';', '\\');
+		}
+		WhiteBoardProtocol p = new WhiteBoardProtocol(password);
+		System.out.println("Good to go, waiting on new clients.");
 		while (true) {
 			try {
 				try { // accept new connections every time and handle them
@@ -67,7 +72,7 @@ public class Server {
 	public static class ClientConnection extends Thread {
 		private Socket clientSocket;
 		private PrintWriter out;
-		private String inputLine, outputLine;
+		private String inputLine;
 		private WhiteBoardProtocol protocol;
 		private BufferedReader in;
 		private Color colour = null;
@@ -98,7 +103,6 @@ public class Server {
 								code = WhiteBoardProtocol.PASSWORD;
 							} else {
 								code = WhiteBoardProtocol.NEEDPASSWORD;
-								continue;
 							}
 						} else if (inputLine.startsWith("PASSWORD")
 								&& inputLine.endsWith("ENDPASSWORD")) {
@@ -135,6 +139,7 @@ public class Server {
 		}
 
 		public void send(String message) {
+			System.out.println("Message to [" + this.clientSocket.getInetAddress() + "]: " + message);
 			out.println(message);
 		}
 

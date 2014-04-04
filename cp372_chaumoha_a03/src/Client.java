@@ -88,8 +88,23 @@ class Client extends Thread{
     			}
     			wb.systemAppendOutputArea(fromServer+"\n");
     		} catch (IOException e) {
-    			_state = STATE_STOP;
     			wb.systemAppendOutputArea("Server disconnected.\n");
+    			wb.connectToggle.setText("Disconnecting");
+    			SwingUtilities.invokeLater(new Runnable() {
+    				public void run() {
+    					try {
+    						tStop();
+    						socket.close();
+    						socket = null;
+    						wb.connectToggle.setText("Connect");
+    						wb.connectToggle.setSelected(false);
+    						wb.systemAppendOutputArea("Disconnected.\n");
+    					} catch (Exception e) {
+    						wb.connectToggle.setText("Disconnect");
+    						wb.connectToggle.setSelected(true);
+    					}
+    				}
+    			});
     		}
     		
     	}

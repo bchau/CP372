@@ -8,6 +8,10 @@ import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -17,12 +21,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.net.SocketFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -63,7 +65,7 @@ public class WhiteBoard {
 	//Fields
 	private JTextField inputArea,ipField, portField;
 	private JTextPane outputArea;
-	private JToggleButton connectToggle;
+	protected JToggleButton connectToggle;
 
 	// Input Fields
 	private JLabel ipLabel, portLabel;
@@ -299,9 +301,82 @@ public class WhiteBoard {
     		
     		//Text area and input
     		JPanel messageBox = new JPanel(new BorderLayout());
+    		final JTextField nameArea = new JTextField("Enter your name: ");
+    		nameArea.addMouseListener(new MouseListener(){
+
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					if (nameArea.getText().equals("Enter your name: ")){
+						nameArea.setText("");
+					}
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mousePressed(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+    			
+    		});
+    		nameArea.addKeyListener(new KeyListener(){
+
+				@Override
+				public void keyPressed(KeyEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void keyReleased(KeyEvent arg0) {
+					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !nameArea.getText().trim().equals("")){
+						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
+					}
+				}
+
+				@Override
+				public void keyTyped(KeyEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+    			
+    		});
+    		nameArea.addFocusListener(new FocusListener(){
+
+				@Override
+				public void focusGained(FocusEvent arg0) {
+				}
+
+				@Override
+				public void focusLost(FocusEvent arg0) {
+					if (!nameArea.getText().trim().equals(""))
+						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
+					else
+						nameArea.setText("Enter your name: ");
+				}
+    			
+    		});
+    		messageBox.add(nameArea,BorderLayout.NORTH);
+    		
     		outputArea = new JTextPane();
     		outputArea.setEditorKit(new WrapEditorKit());
-    		//outputArea.setLineWrap(true);
     		outputArea.setEditable(false);
     		outputArea.setBackground(Color.LIGHT_GRAY);
     		messageBox.add(new JScrollPane(outputArea),BorderLayout.CENTER);
@@ -313,7 +388,34 @@ public class WhiteBoard {
     		JPanel inputBox = new JPanel(new FlowLayout());
     		inputArea = new JTextField("",15);
     		inputArea.setBackground(Color.LIGHT_GRAY);
-    		
+    		inputArea.addKeyListener(new KeyListener(){
+
+				@Override
+				public void keyPressed(KeyEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void keyReleased(KeyEvent arg0) {
+					if (arg0.getKeyChar() == KeyEvent.VK_ENTER && !inputArea.getText().trim().equals("")){
+						
+						appendOutputArea("You: " + inputArea.getText() + "\n");
+						if (client != null) {
+							client.sendData("MESSAGE;" + inputArea.getText()
+									+ ";ENDMESSAGE");
+						}
+						inputArea.setText("");
+					}
+				}
+
+				@Override
+				public void keyTyped(KeyEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+    			
+    		});
     		inputBox.add(new JScrollPane(inputArea));
     		JButton sendButton = new JButton("SEND");
     		sendButton.addActionListener(new ActionListener(){
@@ -426,19 +528,19 @@ public class WhiteBoard {
 					} catch (UnknownHostException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Could not find host.\n");
+						systemAppendOutputArea("Could not find host.\n");
 					} catch (NumberFormatException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Please ensure port number is correct.\n");
+						systemAppendOutputArea("Please ensure port number is correct.\n");
 					} catch (IOException e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea("Could not connect.\n");
+						systemAppendOutputArea("Could not connect.\n");
 					} catch (Exception e) {
 						connectToggle.setText("Connect");
 						connectToggle.setSelected(false);
-						appendOutputArea(e.getMessage() + "\n");
+						systemAppendOutputArea(e.getMessage() + "\n");
 					}
 				}
 			});

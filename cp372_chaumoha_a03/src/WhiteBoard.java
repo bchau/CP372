@@ -335,40 +335,6 @@ public class WhiteBoard {
     		//Text area and input
     		JPanel messageBox = new JPanel(new BorderLayout());
     		final JTextField nameArea = new JTextField("Enter your name: ");
-    		nameArea.addMouseListener(new MouseListener(){
-
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					if (nameArea.getText().equals("Enter your name: ")){
-						nameArea.setText("");
-					}
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void mouseExited(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void mousePressed(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void mouseReleased(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-    			
-    		});
     		nameArea.addKeyListener(new KeyListener(){
 
 				@Override
@@ -396,17 +362,18 @@ public class WhiteBoard {
 
 				@Override
 				public void focusGained(FocusEvent arg0) {
+					if (nameArea.getText().equals("Enter your name: ")){
+						nameArea.setText("");
+					}
 				}
-
+				
 				@Override
 				public void focusLost(FocusEvent arg0) {
 					nameArea.setText(nameArea.getText().replace(';', '\\').replace(',', '\\'));
-					if (!nameArea.getText().trim().equals("") && client != null){
+					if (nameArea.getText().length() > 1 && client != null){
 						name = nameArea.getText();
 						client.sendData("MESSAGE,"+nameArea.getText()+","+Line.getColourHex(textColour)+";;ENDMESSAGE");
 					}
-					else
-						nameArea.setText("Enter your name: ");
 				}
     			
     		});

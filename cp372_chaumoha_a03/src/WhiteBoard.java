@@ -51,7 +51,12 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
-
+/**
+ * Assignment 03 - White Board
+ * CP372 2014
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 public class WhiteBoard {
 
 	/**

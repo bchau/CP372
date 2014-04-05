@@ -5,7 +5,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+/**
+ * Assignment 03 - White Board
+ * CP372 2014
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 public class Server {
 
 	public static void main(String[] args) throws IOException {

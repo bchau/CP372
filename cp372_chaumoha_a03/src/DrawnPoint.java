@@ -1,6 +1,11 @@
 import java.awt.Point;
 import java.io.Serializable;
-
+/**
+ * Assignment 03 - White Board
+ * CP372 2014
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 public class DrawnPoint extends Point implements Serializable{
 	private static final long serialVersionUID = 1L;
 

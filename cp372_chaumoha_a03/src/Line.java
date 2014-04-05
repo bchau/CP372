@@ -1,8 +1,12 @@
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
-
-
+/**
+ * Assignment 03 - White Board
+ * CP372 2014
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 public class Line implements Serializable{
 
 	private static final long serialVersionUID = 1L;

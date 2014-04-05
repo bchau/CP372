@@ -1,6 +1,11 @@
 import java.awt.Color;
 import java.util.ArrayList;
-
+/**
+ * Assignment 03 - White Board
+ * CP372 2014
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 public class WhiteBoardProtocol {
 
 	// requests

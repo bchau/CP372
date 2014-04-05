@@ -8,7 +8,12 @@ import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.SwingUtilities;
-
+/**
+ * Assignment 03 - White Board
+ * CP372 2014
+ * @author Bryan Chau & Mohamed Mohamedtaki
+ *
+ */
 class Client extends Thread {
 	private final static int STATE_RUN = 0, STATE_PAUSE = 2, STATE_STOP = 3;
 	private int _state;
